@@ -32,8 +32,8 @@ I began each time series by checking for stationarity using the **Augmented Dick
 - I also validated that the test statistic fell below the critical values at standard confidence thresholds (10%, 5%, 1%).
 
 If the series failed this check, I applied **first differencing** to stabilize the mean and remove trends:
-```
-diff[t] = value[t] - value[t-1]
+```python
+df_stationary = df.diff().dropna()
 ```
 This operation was applied recursively: after each differencing pass, I reran the ADF test. This allowed me to ensure that the differencing degree `d` in the ARIMA model was not chosen arbitrarily — I backed it up with empirical tests.
 
@@ -51,16 +51,31 @@ The idea was to compare **recent values** against a **stable historical baseline
 - Took the **overall average** of those rolling means and standard deviations
 
 This gave me two stable reference points. From there, I defined the anomaly bounds as:
+```python
+upper_bound = overall_mean + threshold * overall_std
+lower_bound = overall_mean - threshold * overall_std
 ```
-[mean − X × std, mean + X × std]
-```
-where `X = 2` by default (i.e., 95.45% of values in a normal distribution).
+where `threshold = 2` by default (i.e., 95.45% of values in a normal distribution).
 
 But I didn’t blindly apply that threshold. If the average rolling std exceeded the average mean — indicating high volatility or skew — I interpreted the series as too noisy for std-based flagging and skipped anomaly detection. This protected the system from over-flagging in turbulent data regimes.
 
 If the thresholding condition was satisfied, I evaluated the **last N days** (configurable via `how_far`) and flagged any outliers beyond the defined range. These were surfaced as anomalies.
 
 The final output was a filtered DataFrame of anomalies, enriched with contextual columns like the computed mean and std multiplier.
+
+**Code snippet:**
+```python
+rolling_means = historical_data['per_manday'].rolling(window).mean()
+rolling_stds = historical_data['per_manday'].rolling(window).std()
+overall_mean = rolling_means.mean()
+overall_std = rolling_stds.mean()
+
+if overall_std < overall_mean:
+    upper = overall_mean + threshold * overall_std
+    lower = overall_mean - threshold * overall_std
+    recent = df_after_check.iloc[-how_far:]
+    anomalies = recent[(recent['per_manday'] < lower) | (recent['per_manday'] > upper)]
+```
 
 ---
 
@@ -76,6 +91,17 @@ The configuration was:
 I didn’t just fit the model blindly. I split the time series into **training and validation folds** using `TimeSeriesSplit(n_splits=2)`. For each fold, I computed the **mean squared error (MSE)** between predicted and actual values. This provided tangible feedback on model accuracy.
 
 After tuning, I forecasted the **next 5 days**, along with **confidence intervals**. I generated synthetic timestamps for the next 5 days and merged the predictions into the historical timeline for a unified view.
+
+**Code snippet:**
+```python
+ts = TimeSeriesSplit(n_splits=2)
+for train_idx, test_idx in ts.split(daily_data['per_manday']):
+    train, test = daily_data['per_manday'][train_idx], daily_data['per_manday'][test_idx]
+    model = pm.auto_arima(train, seasonal=False, stepwise=True)
+    forecast = model.predict(n_periods=len(test))
+
+forecasts = model.predict(n_periods=days_predict)
+```
 
 This gave me a projected view of future costs — ready for downstream analysis.
 
