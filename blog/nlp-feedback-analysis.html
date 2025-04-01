@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NLP-Powered Feedback Analysis System | Eugene Paulia</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css">
+    <style>
+        :root {
+            --primary: #2a3b4c;
+            --secondary: #5d7a98;
+            --accent: #61dafb;
+            --light: #f5f8fa;
+            --dark: #1a1a2e;
+            --text: #333;
+            --text-light: #666;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Mona Sans, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .blog-header {
+            position: relative;
+            height: 60vh;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background-color: var(--dark);
+        }
+        
+        #particles-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: white;
+            max-width: 800px;
+            padding: 0 2rem;
+        }
+        
+        .blog-date {
+            font-size: 1rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            letter-spacing: 1px;
+        }
+        
+        .blog-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+        
+        .blog-author {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .blog-tags {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .blog-tag {
+            background-color: rgba(97, 218, 251, 0.2);
+            color: var(--accent);
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .blog-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+        
+        .blog-content p {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+        
+        .blog-content h2 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin: 3rem 0 1.5rem;
+            position: relative;
+        }
+        
+        .blog-content h3 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin: 2rem 0 1rem;
+        }
+        
+        .blog-content ul, .blog-content ol {
+            margin: 1.5rem 0;
+            padding-left: 2rem;
+        }
+        
+        .blog-content li {
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+        }
+        
+        code {
+            background-color: #f4f4f4;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Fira Code', Mona Sans, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background-color: #f8f8f8;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .back-to-home {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            z-index: 100;
+            background-color: white;
+            color: var(--primary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .back-to-home:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            color: var(--accent);
+        }
+        
+        @media (max-width: 768px) {
+            .blog-title {
+                font-size: 2.5rem;
+            }
+            
+            .blog-content {
+                padding: 2rem 1.5rem;
+            }
+            
+            .back-to-home {
+                top: 1rem;
+                left: 1rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html#projects" class="back-to-home" id="back-link">
+        <i class="fas fa-arrow-left"></i>
+        Back to Projects
+    </a>
+    
+    <header class="blog-header">
+        <canvas id="particles-canvas"></canvas>
+        <div class="header-content">
+            <div class="blog-date">March 15, 2024</div>
+            <h1 class="blog-title">NLP-Powered Feedback Analysis System</h1>
+            <div class="blog-author">by Eugene Paulia</div>
+            <div class="blog-tags">
+                <span class="blog-tag">NLP</span>
+                <span class="blog-tag">Databricks</span>
+                <span class="blog-tag">Cenovus</span>
+            </div>
+        </div>
+    </header>
+    
+    <article class="blog-content">
+        <p>This project implements an end-to-end NLP system for analyzing employee feedback regarding recreational facilities. The system combines traditional NLP techniques with modern LLM-based classification to extract actionable insights from unstructured survey data, helping decision-makers prioritize potential recreational investments based on employee sentiment and requests.</p>
+
+        <h2>Technical Architecture</h2>
+        <p>The solution is built on Databricks with a modular architecture:</p>
+
+        <h3>1. Data Ingestion & ETL Pipeline</h3>
+        <ul>
+            <li>Processes multi-source feedback from annual surveys and QR code responses</li>
+            <li>Implements robust data transformation and normalization</li>
+            <li>Handles multi-year data integration with standardized schema</li>
+        </ul>
+
+        <h3>2. NLP Processing Engine</h3>
+        <ul>
+            <li>Custom text preprocessing with NLTK (tokenization, lemmatization, stopword removal)</li>
+            <li>Rule-based pattern matching for potential investment identification</li>
+            <li>Contextual understanding of oil & gas industry terminology</li>
+        </ul>
+
+        <h3>3. LLM-Enhanced Sentiment & Intent Analysis</h3>
+        <ul>
+            <li>Integration with Databricks' LLM serving endpoints</li>
+            <li>Domain-specific prompt engineering for oil & gas context</li>
+            <li>Comparative evaluation of API-based vs. SQL-native AI functions</li>
+            <li>Cost optimization through token usage tracking</li>
+        </ul>
+
+        <h3>4. Analytics & Visualization Layer</h3>
+        <ul>
+            <li>Year-over-year trend analysis of recreational priorities</li>
+            <li>Cross-source validation (annual surveys vs. QR feedback)</li>
+            <li>Quantified popularity scoring of potential investments</li>
+        </ul>
+
+        <h2>Key Technical Implementations</h2>
+
+        <h3>Domain-Specific NLP Preprocessing</h3>
+        <pre><code class="language-python">def text_preprocess(text):
+  if pd.isna(text):
+    return ""
+  
+  text = str(text).lower()
+  # Remove punctuation while preserving context
+  text = re.sub(f'[{string.punctuation}]', ' ', text)
+  # Tokenize and lemmatize
+  tokens = word_tokenize(text)
+  processed_tokens = [lemmatizer.lemmatize(token) for token in tokens 
+        if token not in stop_words and len(token) > 1]
+  
+  return " ".join(processed_tokens)</code></pre>
+
+        <h3>Context-Aware LLM Classification</h3>
+        <pre><code class="language-python">def classify_sentiment(text, token = databricks_token) -> str:
+  # Domain-specific prompt engineering for oil & gas context
+  prompt = f"""This is a comment from a survey question from field staff at
+               an Oil & Gas company in Canada. It may include sarcasm or specificities of the
+               Oil & Gas industry in Canada. Keep that in mind..."""
+  
+  headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+  payload = {
+        "messages": [
+            {"role": "user", "content": prompt}
+        ]
+    }
+  
+  response = requests.post("https://prod.cloud.databricks.com/serving-endpoints/", 
+                          headers=headers, json=payload)
+  
+  return re.sub("\.", "", str(result["choices"][0]["message"]["content"]).strip().lower())</code></pre>
+
+        <h3>Pattern-Based Investment Identification</h3>
+        <pre><code class="language-python">matching_rules = {
+    "Golf Simulator": {"required_terms": ["golf", "simulator", "golfing", "putting"]},
+    "Walking Path": {"required_terms": ["walking path", "running path", "walk", "run", "jog"]},
+    "Baseball Diamond": {"required_terms": ["baseball", "baseball diamond"]},
+    # Additional rules...
+}
+
+def match_analysis(comments, projects_to_find, processed_projects, year=1970):
+    results = {project: {'count': 0, 'comments': []} for project in projects_to_find}
+    
+    for comment in comments:
+        for project, processed_project in processed_projects.items():
+            project_words = set(matching_rules[project]['required_terms'])
+            comment_words = set(comment.split())
+            
+            if project_words and (processed_project in comment or 
+                                len(project_words.intersection(comment_words)) > 0):
+                results[project]['count'] += 1
+                results[project]['comments'].append(comment)
+
+    return results</code></pre>
+
+        <h2>Technical Innovations</h2>
+        <ol>
+            <li><strong>Hybrid NLP Approach</strong>: Combines traditional NLP techniques (NLTK) with modern LLM capabilities, leveraging the strengths of both approaches.</li>
+            <li><strong>Domain-Specific Classification</strong>: Custom-engineered prompts that account for oil & gas industry context and field staff communication patterns.</li>
+            <li><strong>Cost-Aware AI Integration</strong>: Real-time tracking of token usage and associated costs, with performance benchmarking between different implementation methods.</li>
+            <li><strong>Data Integration Framework</strong>: Unified processing of multi-source, multi-year feedback data with flexible schema adaptation.</li>
+            <li><strong>Rule-Based Pattern Recognition</strong>: Extensible rules system for identifying potential investments while handling variations in terminology.</li>
+        </ol>
+
+        <h2>Business Impact</h2>
+        <p>This system enables the Recreation team to:</p>
+        <ul>
+            <li>Quantitatively prioritize investment decisions based on employee feedback</li>
+            <li>Track changing preferences over time across different data sources</li>
+            <li>Understand the sentiment and intent behind specific recreational requests</li>
+            <li>Optimize the allocation of limited recreational budget to maximize employee satisfaction</li>
+        </ul>
+
+        <p>The combination of NLP processing and LLM-based classification delivers deeper insights than traditional keyword-based systems, while maintaining cost efficiency through careful monitoring and optimization of AI resource usage.</p>
+    </article>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-python.min.js"></script>
+    <script>
+        // Check referrer and update back link
+        document.addEventListener('DOMContentLoaded', function() {
+            const referrer = document.referrer;
+            const backLink = document.getElementById('back-link');
+            
+            if (referrer.includes('all-projects.html')) {
+                backLink.href = 'all-projects.html';
+            }
+        });
+
+        // Particle system animation
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+        
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = Math.random() * 0.2 - 0.1;
+                this.vy = Math.random() * 0.2 - 0.1;
+                this.radius = Math.random() * 2 + 1;
+                this.opacity = Math.random() * 0.5 + 0.2;
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+            
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(97, 218, 251, ${this.opacity})`;
+                ctx.fill();
+            }
+        }
+        
+        const particles = Array.from({ length: 100 }, () => new Particle());
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+            
+            particles.forEach((p1, i) => {
+                particles.slice(i + 1).forEach(p2 => {
+                    const dx = p1.x - p2.x;
+                    const dy = p1.y - p2.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 100) {
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = `rgba(97, 218, 251, ${0.2 * (1 - distance / 100)})`;
+                        ctx.stroke();
+                    }
+                });
+            });
+        }
+        
+        animate();
+    </script>
+</body>
+</html> 

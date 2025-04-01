@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intelligent Document Processing: Building a Table Extraction Pipeline | Eugene Paulia</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css">
+    <style>
+        :root {
+            --primary: #2a3b4c;
+            --secondary: #5d7a98;
+            --accent: #61dafb;
+            --light: #f5f8fa;
+            --dark: #1a1a2e;
+            --text: #333;
+            --text-light: #666;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Mona Sans, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .blog-header {
+            position: relative;
+            height: 60vh;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background-color: var(--dark);
+        }
+        
+        #particles-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: white;
+            max-width: 800px;
+            padding: 0 2rem;
+        }
+        
+        .blog-date {
+            font-size: 1rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            letter-spacing: 1px;
+        }
+        
+        .blog-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+        
+        .blog-author {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .blog-tags {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .blog-tag {
+            background-color: rgba(97, 218, 251, 0.2);
+            color: var(--accent);
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .blog-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .blog-content p {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+            line-height: 1.8;
+        }
+        
+        .blog-content h2 {
+            font-size: 2.2rem;
+            color: var(--primary);
+            margin: 3rem 0 1.5rem;
+            position: relative;
+            letter-spacing: -0.5px;
+        }
+        
+        .blog-content h3 {
+            font-size: 1.6rem;
+            color: var(--primary);
+            margin: 2rem 0 1rem;
+            letter-spacing: -0.3px;
+        }
+        
+        .blog-content ul, .blog-content ol {
+            margin: 1.5rem 0;
+            padding-left: 2rem;
+        }
+        
+        .blog-content li {
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+            line-height: 1.7;
+        }
+        
+        code {
+            background-color: #f4f4f4;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Fira Code', Mona Sans, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background-color: #f8f8f8;
+            padding: 1.5rem;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+        }
+        
+        pre:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .back-to-home {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            z-index: 100;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: var(--primary);
+            padding: 0.9rem 1.8rem;
+            border-radius: 30px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .back-to-home:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            color: var(--accent);
+        }
+        
+        .back-to-home i {
+            transition: transform 0.3s ease;
+        }
+        
+        .back-to-home:hover i {
+            transform: translateX(-4px);
+        }
+        
+        @media (max-width: 768px) {
+            .blog-title {
+                font-size: 2.5rem;
+            }
+            
+            .blog-content {
+                padding: 2rem 1.5rem;
+            }
+            
+            .back-to-home {
+                top: 1rem;
+                left: 1rem;
+                padding: 0.7rem 1.4rem;
+                font-size: 0.9rem;
+            }
+            
+            pre {
+                padding: 1rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html#projects" class="back-to-home" id="back-link">
+        <i class="fas fa-arrow-left"></i>
+        Back to Projects
+    </a>
+    
+    <header class="blog-header">
+        <canvas id="particles-canvas"></canvas>
+        <div class="header-content">
+            <div class="blog-date">March 2024</div>
+            <h1 class="blog-title">Intelligent Document Processing: Building a Table Extraction Pipeline</h1>
+            <div class="blog-author">by Eugene Paulia</div>
+            <div class="blog-tags">
+                <span class="blog-tag">Hugging Face</span>
+                <span class="blog-tag">OCR</span>
+                <span class="blog-tag">Cenovus</span>
+            </div>
+        </div>
+    </header>
+    
+    <article class="blog-content">
+        <h2>Project Overview</h2>
+        <p>This project implements an advanced document processing pipeline that automatically extracts structured data from PDF invoices. By combining computer vision techniques with deep learning models from Hugging Face, I developed a solution that locates tables within documents, extracts their contents, and converts unstructured visual information into structured data ready for analysis.</p>
+
+        <h2>Technical Architecture</h2>
+        <p>The solution follows a multi-stage pipeline architecture:</p>
+
+        <h3>1. Document Conversion Layer</h3>
+        <ul>
+            <li>PDF to high-resolution image conversion</li>
+            <li>Page-by-page processing for multi-page documents</li>
+            <li>Image format standardization and optimization</li>
+        </ul>
+
+        <h3>2. Table Detection Engine</h3>
+        <ul>
+            <li>Hugging Face Transformers-based object detection</li>
+            <li>Custom-trained model for table boundary recognition</li>
+            <li>Confidence thresholding for precision control</li>
+        </ul>
+
+        <h3>3. Image Processing Pipeline</h3>
+        <ul>
+            <li>Region of interest extraction based on detection coordinates</li>
+            <li>Advanced image preprocessing for OCR optimization</li>
+            <li>Multi-stage enhancement through OpenCV</li>
+        </ul>
+
+        <h3>4. Text Extraction System</h3>
+        <ul>
+            <li>Fine-tuned Tesseract OCR configuration</li>
+            <li>Spatial text analysis and line grouping</li>
+            <li>Pattern matching through regular expressions</li>
+        </ul>
+
+        <h2>Implementation Details</h2>
+
+        <h3>Stage 1: Document Conversion and Preparation</h3>
+        <pre><code class="language-python"># Certificate handling for secure connections
+cafile = certifi.where()
+with open(r"C:\Users\epaulia\OneDrive - Cenovus Energy Inc\Documents\Pdf to Excel\Cenovus Root CA.crt", 'rb') as infile:
+    customca = infile.read()
+with open(cafile, 'rb') as existing_file:
+    current_certs = existing_file.read()
+if customca not in current_certs:
+    with open(cafile, 'ab') as f:
+            f.write(customca)
+
+# Convert PDF to high-resolution images
+images = convert_from_path(r"C:\Users\epaulia\OneDrive - Cenovus Energy Inc\Documents\Pdf to Excel\Inv1050_ 1800000044 -CFA-2024-03-CEN.pdf")
+
+# Save each page as a separate image for processing
+for i, page in enumerate(images):
+    page.save(f"image_{i}.jpg", 'JPEG')</code></pre>
+
+        <h3>Stage 2: Table Detection with Hugging Face Transformers</h3>
+        <pre><code class="language-python"># Initialize Hugging Face pipeline for object detection
+pipe = pipeline("object-detection", model=r"C:\Users\epaulia\OneDrive - Cenovus Energy Inc\Documents\Pdf to Excel\local_model_dir")
+
+# Alternative approach with direct model loading for more control
+processor = AutoImageProcessor.from_pretrained(r"C:\Users\epaulia\OneDrive - Cenovus Energy Inc\Documents\Pdf to Excel\local_model_dir")
+model = AutoModelForObjectDetection.from_pretrained(r"C:\Users\epaulia\OneDrive - Cenovus Energy Inc\Documents\Pdf to Excel\local_model_dir")
+
+# Load image for processing
+image = Image.open(r"C:\Users\epaulia\OneDrive - Cenovus Energy Inc\Documents\Pdf to Excel\image_1.jpg").convert("RGB")
+
+# Prepare image for model inference
+inputs = processor(images=image, return_tensors="pt")
+
+# Run model inference
+outputs = model(**inputs)
+
+# Process detection results
+target_sizes = torch.tensor([image.size[::-1]])
+results = processor.post_process_object_detection(outputs, threshold=0.9, target_sizes=target_sizes)[0]
+
+# Extract bounding box coordinates
+for score, label, box in zip(results["scores"], results["labels"], results["boxes"]):
+    box = [round(i, 2) for i in box.tolist()]
+    print(f"Detected {model.config.id2label[label.item()]} with confidence {round(score.item(), 3)} at location {box}")
+
+# Crop image to table boundaries
+cropped_img = image.crop(box)
+cropped_img.save("cropped_img.jpg")</code></pre>
+
+        <h3>Stage 3: Image Preprocessing for OCR Optimization</h3>
+        <pre><code class="language-python">def preprocess_image(image_path):
+    # Load image and convert to grayscale
+    image = cv2.imread(image_path)
+    gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    
+    # Scale up image for better OCR performance (2x)
+    resized_image = cv2.resize(gray_image, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+    
+    # Apply noise reduction
+    denoised_image = cv2.fastNlMeansDenoising(resized_image, None, 30, 7, 21)
+    
+    # Apply adaptive thresholding for binarization
+    preprocessed_image = cv2.adaptiveThreshold(
+        denoised_image, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C, cv2.THRESH_BINARY, 11, 2
+    )
+    
+    return preprocessed_image
+
+# Apply preprocessing to cropped table image
+preprocessed_image = preprocess_image("cropped_img.jpg")</code></pre>
+
+        <h3>Stage 4: OCR and Text Extraction</h3>
+        <pre><code class="language-python">def perform_ocr(preprocessed_image):
+    # Configure Tesseract for table content
+    config = '--psm 12 --oem 3'  # Page segmentation mode 12 (sparse text) with LSTM OCR Engine
+    
+    # Extract text with positioning data
+    data = pytesseract.image_to_data(preprocessed_image, output_type=Output.DICT, config=config)
+    return data
+
+# Perform OCR on preprocessed image
+ocr_data = perform_ocr(preprocessed_image)
+
+# Process OCR results and group text by lines based on vertical positioning
+lines = []
+current_line = []
+previous_y = ocr_data['top'][0]
+
+for i in range(len(ocr_data['text'])):
+    if ocr_data['text'][i].strip() != '':
+        # Group text elements into lines (threshold of 10px vertical difference)
+        if abs(ocr_data['top'][i] - previous_y) > 10:
+            lines.append(' '.join(current_line))
+            current_line = []
+        current_line.append(ocr_data['text'][i])
+        previous_y = ocr_data['top'][i]
+
+# Add the final line
+if current_line:
+    lines.append(' '.join(current_line))</code></pre>
+
+        <h3>Stage 5: Pattern Extraction and Data Structuring</h3>
+        <pre><code class="language-python"># Define extraction pattern for names (example - can be customized for different data)
+name_pattern = r'\b[A-Z][A-Za-z\'`-]+, [A-Z][A-Za-z\'`-]+\b'
+
+# Extract structured data using regex
+all_names = []
+for line in lines:
+    # Find all matches in the text
+    names = re.findall(name_pattern, line)
+    all_names.append(names)
+
+# Clean up results
+all_names = [name for name in all_names if len(name)>0]
+
+cleaned_names = []
+for deep1_name in all_names:
+    for i in range(0, len(deep1_name)):
+        deep2_name = deep1_name[i]
+        cleaned_names.append(deep2_name)
+
+print(f"Here are {len(cleaned_names)} names extracted: {cleaned_names}")</code></pre>
+
+        <h2>Technical Innovations</h2>
+        <ol>
+            <li><strong>Custom Document Processing Pipeline</strong>: Built an end-to-end solution that handles each stage of document processing, from PDF conversion to structured data extraction.</li>
+            <li><strong>Transformer-Based Table Detection</strong>: Leveraged Hugging Face's vision transformer models to accurately locate and extract tables from complex documents, significantly outperforming traditional rule-based approaches.</li>
+            <li><strong>Multi-Stage Image Enhancement</strong>: Implemented a sophisticated image preprocessing workflow that combines resizing, denoising, and adaptive thresholding to optimize OCR accuracy.</li>
+            <li><strong>Spatial Text Analysis</strong>: Developed an algorithm that groups extracted text based on spatial positioning, preserving the tabular structure of the original document.</li>
+            <li><strong>Pattern-Based Data Extraction</strong>: Created flexible regular expression patterns that can extract specific data types (names, dates, amounts) from the processed text.</li>
+        </ol>
+
+        <h2>Business Impact</h2>
+        <p>This intelligent document processing solution enables:</p>
+        <ul>
+            <li><strong>Automated Data Entry</strong>: Elimination of manual data entry from invoices and other tabular documents</li>
+            <li><strong>Accelerated Processing</strong>: Reduction in document processing time from hours to minutes</li>
+            <li><strong>Error Reduction</strong>: Minimization of human transcription errors in critical financial data</li>
+            <li><strong>Scalable Operations</strong>: Ability to process thousands of documents consistently</li>
+            <li><strong>Cost Savings</strong>: Significant reduction in operational costs associated with manual document processing</li>
+        </ul>
+
+        <p>The combination of computer vision, deep learning, and OCR technologies creates a robust solution that handles the variability and complexity of real-world business documents, delivering structured data that integrates seamlessly with downstream business systems and analytics.</p>
+    </article>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-python.min.js"></script>
+    <script>
+        // Check referrer and update back link
+        document.addEventListener('DOMContentLoaded', function() {
+            const referrer = document.referrer;
+            const backLink = document.getElementById('back-link');
+            
+            if (referrer.includes('all-projects.html')) {
+                backLink.href = 'all-projects.html';
+            }
+        });
+
+        // Particle system animation
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+        
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = Math.random() * 0.2 - 0.1;
+                this.vy = Math.random() * 0.2 - 0.1;
+                this.radius = Math.random() * 2 + 1;
+                this.opacity = Math.random() * 0.5 + 0.2;
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+            
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(97, 218, 251, ${this.opacity})`;
+                ctx.fill();
+            }
+        }
+        
+        const particles = Array.from({ length: 100 }, () => new Particle());
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+            
+            particles.forEach((p1, i) => {
+                particles.slice(i + 1).forEach(p2 => {
+                    const dx = p1.x - p2.x;
+                    const dy = p1.y - p2.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 100) {
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = `rgba(97, 218, 251, ${0.2 * (1 - distance / 100)})`;
+                        ctx.stroke();
+                    }
+                });
+            });
+        }
+        
+        animate();
+    </script>
+</body>
+</html> 

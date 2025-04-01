@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comment Classification: Fine-tuning Transformer Models | Eugene Paulia</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css">
+    <style>
+        :root {
+            --primary: #2a3b4c;
+            --secondary: #5d7a98;
+            --accent: #61dafb;
+            --light: #f5f8fa;
+            --dark: #1a1a2e;
+            --text: #333;
+            --text-light: #666;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Mona Sans, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .blog-header {
+            position: relative;
+            height: 60vh;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background-color: var(--dark);
+        }
+        
+        #particles-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: white;
+            max-width: 800px;
+            padding: 0 2rem;
+        }
+        
+        .blog-date {
+            font-size: 1rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            letter-spacing: 1px;
+        }
+        
+        .blog-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+        
+        .blog-author {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .blog-tags {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .blog-tag {
+            background-color: rgba(97, 218, 251, 0.2);
+            color: var(--accent);
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .blog-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+        
+        .blog-content p {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+        
+        .blog-content h2 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin: 3rem 0 1.5rem;
+            position: relative;
+        }
+        
+        .blog-content h3 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin: 2rem 0 1rem;
+        }
+        
+        .blog-content ul, .blog-content ol {
+            margin: 1.5rem 0;
+            padding-left: 2rem;
+        }
+        
+        .blog-content li {
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+        }
+        
+        code {
+            background-color: #f4f4f4;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Fira Code', Mona Sans, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background-color: #f8f8f8;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .back-to-home {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            z-index: 100;
+            background-color: white;
+            color: var(--primary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .back-to-home:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            color: var(--accent);
+        }
+        
+        @media (max-width: 768px) {
+            .blog-title {
+                font-size: 2.5rem;
+            }
+            
+            .blog-content {
+                padding: 2rem 1.5rem;
+            }
+            
+            .back-to-home {
+                top: 1rem;
+                left: 1rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        .status-note {
+            background-color: rgba(97, 218, 251, 0.1);
+            border-left: 4px solid var(--accent);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .status-note p {
+            margin: 0;
+            color: var(--text);
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html#projects" class="back-to-home" id="back-link">
+        <i class="fas fa-arrow-left"></i>
+        Back to Projects
+    </a>
+    
+    <header class="blog-header">
+        <canvas id="particles-canvas"></canvas>
+        <div class="header-content">
+            <div class="blog-date">January 15, 2024</div>
+            <h1 class="blog-title">Comment Classification: Fine-tuning Transformer Models</h1>
+            <div class="blog-author">by Eugene Paulia</div>
+            <div class="blog-tags">
+                <span class="blog-tag">PyTorch</span>
+                <span class="blog-tag">RoBERTa</span>
+                <span class="blog-tag">Cenovus</span>
+            </div>
+        </div>
+    </header>
+    
+    <article class="blog-content">
+        <div class="status-note">
+            <p><strong>Project Status</strong>: This represents an earlier approach to the comment classification problem, preceding the Databricks LLM-based solution. Development was paused due to accuracy limitations and resource constraints.</p>
+        </div>
+
+        <h2>Project Overview</h2>
+        <p>This project represents my initial approach to classifying employee survey comments, comparing the performance of advanced transformer models (BERT and RoBERTa) against traditional ML approaches (SVC and Random Forest). While technically sound, this approach faced practical challenges that ultimately led me to develop the more efficient Databricks LLM-based solution.</p>
+
+        <h2>Technical Architecture</h2>
+        <p>The solution follows a modular, production-ready architecture:</p>
+
+        <h3>1. Data Processing Pipeline</h3>
+        <ul>
+            <li>Robust data loading and preprocessing</li>
+            <li>Flexible handling of Excel-based survey data</li>
+            <li>Dynamic label encoding for multi-class classification</li>
+            <li>Text normalization and feature extraction for traditional models</li>
+        </ul>
+
+        <h3>2. Model Training Framework</h3>
+        <ul>
+            <li>Implementation of both transformer-based and traditional ML approaches</li>
+            <li>Custom PyTorch dataset class for handling tokenized sequences</li>
+            <li>Hyperparameter management through configuration dictionaries</li>
+            <li>Unified training interface across different model architectures</li>
+        </ul>
+
+        <h3>3. Evaluation System</h3>
+        <ul>
+            <li>Standardized accuracy assessment across all models</li>
+            <li>Automated train/test splitting with consistent random seeds</li>
+            <li>Output prediction handling for downstream analysis</li>
+        </ul>
+
+        <h2>Key Technical Implementations</h2>
+
+        <h3>Custom PyTorch Dataset for Transformer Models</h3>
+        <pre><code class="language-python">class CustomDataset(Dataset):
+    def __init__(self, encodings, labels):
+        self.encodings = encodings
+        self.labels = labels
+
+    def __getitem__(self, idx):
+        item = {key: val[idx] for key, val in self.encodings.items()}
+        item['labels'] = torch.tensor(self.labels[idx])
+        return item
+
+    def __len__(self):
+        return len(self.labels)</code></pre>
+
+        <h3>BERT Model Fine-tuning</h3>
+        <pre><code class="language-python">def bert_model(dependent, independent, **args):
+    # Data preparation with label encoding
+    x_train, x_test, y_train, y_test = train_test_split(
+        independent, dependent, test_size=0.2, random_state=42
+    )
+    label_mapping = {label: idx for idx, label in enumerate(set(y_train))}
+    y_train = [label_mapping[label] for label in y_train]
+    y_test = [label_mapping[label] for label in y_test]
+
+    # Tokenization with sequence length handling
+    tokenizer = BertTokenizer.from_pretrained(r'...', local_files_only=True)
+    train_encodings = tokenizer(
+        x_train.tolist(), 
+        truncation=True, 
+        padding=True, 
+        max_length=256
+    )
+    test_encodings = tokenizer(
+        x_test.tolist(), 
+        truncation=True, 
+        padding=True, 
+        max_length=256
+    )
+
+    # Dataset preparation
+    train_dataset = CustomDataset(train_encodings, y_train)
+    test_dataset = CustomDataset(test_encodings, y_test)
+
+    # Model initialization and configuration
+    model = BertForSequenceClassification.from_pretrained(
+        r'...', 
+        num_labels=len(label_mapping)
+    )
+    training_args = TrainingArguments(**args)
+    
+    # Training setup with HuggingFace Trainer
+    trainer = Trainer(
+        model=model,
+        args=training_args,
+        train_dataset=train_dataset,
+        eval_dataset=test_dataset
+    )
+
+    # Model training and evaluation
+    trainer.train()
+    y_pred = trainer.predict(test_dataset)
+    y_pred = np.argmax(y_pred.predictions, axis=1)
+    
+    return accuracy_score(y_test, y_pred), y_pred, trainer</code></pre>
+
+        <h3>Unified Model Selection Interface</h3>
+        <pre><code class="language-python">def main(model):
+    PATH = r"C:\Users\epaulia\OneDrive - Cenovus Energy Inc\Documents\FA Survyes project\Data\comments combined 2021.xlsx"
+    dependent, independent = load_data(PATH)
+
+    if model == "BERT":
+        args_bert = {
+            "output_dir": './results',
+            "num_train_epochs": 3,
+            "per_device_train_batch_size": 8,
+            "per_device_eval_batch_size": 8,
+            "warmup_steps": 500,
+            "weight_decay": 0.01,
+            "learning_rate": 2e-5,
+            "logging_dir": './logs'
+        }
+        accuracy_bert, y_pred_bert, model_bert = bert_model(
+            dependent, independent, **args_bert
+        )
+        print(f"Accuracy for BERT: {accuracy_bert}")
+        
+    elif model == "ROBERTA":
+        # Similar configuration and training for RoBERTa
+        pass</code></pre>
+
+        <h2>Challenges and Transition to Databricks Approach</h2>
+        <p>While this approach demonstrated my ability to implement sophisticated ML pipelines using PyTorch and transformer models, several practical challenges emerged:</p>
+
+        <ol>
+            <li><strong>Accuracy Plateau</strong>: The models' accuracy wouldn't improve beyond a certain threshold without significantly more labeled training data, which was time-consuming and resource-intensive to produce.</li>
+            <li><strong>Computational Demands</strong>: Fine-tuning large transformer models like BERT and RoBERTa required substantial computational resources and time, making iterations slow and costly.</li>
+            <li><strong>Scalability Concerns</strong>: As the volume of comments increased, the processing and training time grew exponentially, raising concerns about the long-term viability of this approach.</li>
+        </ol>
+
+        <p>These challenges led me to pause this implementation and develop the more efficient Databricks LLM-based solution, which leverages pre-trained models through API calls and SQL functions, requiring minimal fine-tuning while delivering comparable or better results with significantly less overhead.</p>
+
+        <h2>Technical Skills Demonstrated</h2>
+        <p>Despite not becoming the final production solution, this project showcases my abilities in:</p>
+
+        <ol>
+            <li><strong>PyTorch Implementation</strong>: Creating custom datasets and implementing complex deep learning architectures</li>
+            <li><strong>Transformer Model Fine-tuning</strong>: Working with state-of-the-art NLP models from the Hugging Face ecosystem</li>
+            <li><strong>ML Pipeline Design</strong>: Building modular, maintainable machine learning workflows</li>
+            <li><strong>Comparative Analysis</strong>: Methodical evaluation of different model architectures against the same task</li>
+            <li><strong>Technical Decision-making</strong>: Recognizing limitations of an approach and pivoting to more efficient solutions</li>
+        </ol>
+
+        <p>The experience and insights gained from this implementation directly informed the design of the subsequent Databricks solution, demonstrating my ability to iterate and improve approaches based on practical constraints and business needs.</p>
+    </article>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-python.min.js"></script>
+    <script>
+        // Check referrer and update back link
+        document.addEventListener('DOMContentLoaded', function() {
+            const referrer = document.referrer;
+            const backLink = document.getElementById('back-link');
+            
+            if (referrer.includes('all-projects.html')) {
+                backLink.href = 'all-projects.html';
+            }
+        });
+
+        // Particle system animation
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+        
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = Math.random() * 0.2 - 0.1;
+                this.vy = Math.random() * 0.2 - 0.1;
+                this.radius = Math.random() * 2 + 1;
+                this.opacity = Math.random() * 0.5 + 0.2;
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+            
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(97, 218, 251, ${this.opacity})`;
+                ctx.fill();
+            }
+        }
+        
+        const particles = Array.from({ length: 100 }, () => new Particle());
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+            
+            particles.forEach((p1, i) => {
+                particles.slice(i + 1).forEach(p2 => {
+                    const dx = p1.x - p2.x;
+                    const dy = p1.y - p2.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 100) {
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = `rgba(97, 218, 251, ${0.2 * (1 - distance / 100)})`;
+                        ctx.stroke();
+                    }
+                });
+            });
+        }
+        
+        animate();
+    </script>
+</body>
+</html> 
