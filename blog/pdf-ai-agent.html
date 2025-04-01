@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF AI Agent: Production-Grade Document Analysis | Eugene Paulia</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mermaid-js/mermaid-cli/dist/mermaid.min.css">
+    <style>
+        :root {
+            --primary: #2a3b4c;
+            --secondary: #5d7a98;
+            --accent: #61dafb;
+            --light: #f5f8fa;
+            --dark: #1a1a2e;
+            --text: #333;
+            --text-light: #666;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Mona Sans, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .blog-header {
+            position: relative;
+            height: 60vh;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background-color: var(--dark);
+        }
+        
+        #particles-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: white;
+            max-width: 800px;
+            padding: 0 2rem;
+        }
+        
+        .blog-date {
+            font-size: 1.1rem;
+            color: var(--accent);
+            margin-bottom: 1.2rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+        
+        .blog-title {
+            font-size: 4rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            letter-spacing: -1px;
+        }
+        
+        .blog-author {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+            letter-spacing: 0.2px;
+        }
+        
+        .blog-tags {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .blog-tag {
+            background-color: rgba(97, 218, 251, 0.15);
+            color: var(--accent);
+            padding: 0.5rem 1.2rem;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            transition: all 0.3s ease;
+        }
+        
+        .blog-tag:hover {
+            background-color: rgba(97, 218, 251, 0.25);
+            transform: translateY(-1px);
+        }
+        
+        .blog-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+        
+        .blog-content p {
+            font-size: 1.15rem;
+            margin-bottom: 1.8rem;
+            color: var(--text);
+            line-height: 1.8;
+            letter-spacing: -0.2px;
+        }
+        
+        .blog-content strong {
+            color: var(--primary);
+            font-weight: 600;
+            letter-spacing: -0.2px;
+        }
+        
+        .blog-content hr {
+            margin: 4rem 0;
+            border: none;
+            border-top: 2px solid rgba(0, 0, 0, 0.08);
+        }
+        
+        .blog-content h2 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin: 3.5rem 0 2rem;
+            position: relative;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        
+        .blog-content h3 {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin: 2.5rem 0 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+        
+        .blog-content h4 {
+            font-size: 1.4rem;
+            color: var(--primary);
+            margin: 2rem 0 1rem;
+            font-weight: 600;
+        }
+        
+        .blog-content ul, .blog-content ol {
+            margin: 1.8rem 0;
+            padding-left: 2.5rem;
+        }
+        
+        .blog-content li {
+            margin-bottom: 1rem;
+            font-size: 1.15rem;
+            line-height: 1.7;
+        }
+        
+        .highlight {
+            background-color: rgba(97, 218, 251, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            color: var(--primary);
+            font-weight: 500;
+        }
+        
+        .checkmark {
+            color: #4CAF50;
+            margin-left: 0.5rem;
+            font-size: 1.1rem;
+        }
+        
+        code {
+            background-color: #f4f4f4;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Fira Code', Mona Sans, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background-color: #f8f8f8;
+            padding: 2rem;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 2rem 0;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            font-size: 1rem;
+            line-height: 1.7;
+            font-family: 'Fira Code', Mona Sans, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif;
+        }
+        
+        .back-to-home {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            z-index: 100;
+            background-color: white;
+            color: var(--primary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .back-to-home:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            color: var(--accent);
+        }
+        
+        @media (max-width: 768px) {
+            .blog-title {
+                font-size: 2.8rem;
+                letter-spacing: -0.5px;
+            }
+            
+            .blog-content h2 {
+                font-size: 2rem;
+                margin: 3rem 0 1.5rem;
+            }
+            
+            .blog-content h3 {
+                font-size: 1.6rem;
+                margin: 2rem 0 1rem;
+            }
+
+            .blog-content h4 {
+                font-size: 1.3rem;
+                margin: 1.5rem 0 1rem;
+            }
+            
+            .blog-content p, .blog-content li {
+                font-size: 1.1rem;
+            }
+
+            pre {
+                padding: 1.5rem;
+            }
+
+            .mermaid {
+                padding: 2rem;
+            }
+            
+            .back-to-home {
+                top: 1rem;
+                left: 1rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html#projects" class="back-to-home" id="back-link">
+        <i class="fas fa-arrow-left"></i>
+        Back to Projects
+    </a>
+    
+    <header class="blog-header">
+        <canvas id="particles-canvas"></canvas>
+        <div class="header-content">
+            <div class="blog-date">March 2024</div>
+            <h1 class="blog-title">PDF AI Agent: Production-Grade Document Analysis</h1>
+            <div class="blog-author">by Eugene Paulia</div>
+            <div class="blog-tags">
+                <span class="blog-tag">LLMs</span>
+                <span class="blog-tag">OCR</span>
+                <span class="blog-tag">GroupLabs</span>
+            </div>
+        </div>
+    </header>
+    
+    <article class="blog-content">
+        <p>A document analysis pipeline using our <strong>PDF Agent stack</strong> as a demo for a client to showcase our capabilities and advantages of LPUs. It's designed to extract clean summaries and structured metadata from PDFs using a mix of LLMs, OCR, and metadata readers.</p>
+
+        <p>This isn't just another wrapper. Here's what makes this special:</p>
+
+        <hr>
+
+        <h2>Use case</h2>
+        <p>Drag and drop a PDF (like a research paper or business report), and we:</p>
+        <ul>
+            <li>Extract all the text (even from scanned or image-only PDFs)</li>
+            <li>Detect the document type (resume, article, academic paper, etc.)</li>
+            <li>Run metadata extraction with specialized LLM prompts for each type</li>
+            <li>Summarize content using different styles (technical, simple, executive...)</li>
+        </ul>
+
+        <p>All in a few seconds, with streamlining for both user input and developer integrations.</p>
+
+        <hr>
+
+        <h2>Under the hood</h2>
+        <p>This demo runs on a real production-grade stack:</p>
+        <ul>
+            <li><strong>CI/CD</strong>: Deployed through GitHub Actions to Azure Web Apps <span class="checkmark">✓</span></li>
+            <li><strong>LLMs</strong>: Swappable LLM backends (OpenAI or GroupLabs, depending on speed/price needs)</li>
+            <li><strong>Cost-aware</strong>: Built-in cost tracking agents for every token processed</li>
+            <li><strong>Text extraction</strong>: Hybrid engine with:
+                <ul>
+                    <li>PyMuPDF</li>
+                    <li>PyPDF2</li>
+                    <li><strong>Mistral OCR API</strong> – new state-of-the-art OCR reaching 99% accuracy</li>
+                </ul>
+            </li>
+            <li><strong>Metadata extraction agent</strong>: Uses LLMs with structured output (JSON) + embedded PDF metadata fallback</li>
+            <li><strong>Summarizer agent</strong>: Concise / executive / simple / technical styles with prompt engineering</li>
+        </ul>
+
+        <h2>Results</h2>
+        <p>We benchmarked the system across multiple LLM providers using standardized prompts and speed/cost tests.</p>
+
+        <p>When running on <strong>Groq with LPUs</strong> (Language Processing Units):</p>
+        <pre>
+            <strong>Inference Speed:</strong> 8x tokens/s faster vs baseline,
+            <strong>Cost Reduction:</strong> 9x cheaper per token</pre>
+
+        <p>All major operations are parallelized and asynchronous, from text extraction and OCR to metadata and summarization calls.</p>
+
+        <p>We also added:</p>
+        <ul>
+            <li>Token-level usage tracking and cost estimation per prompt/response pair</li>
+            <li>Speed benchmarking tools to measure response latency and throughput across different providers</li>
+        </ul>
+
+        <hr>
+
+        <h2>Architecture Preview</h2>
+        <p>At the core of the system is a modular agent-based architecture that makes each component independently testable and swappable.</p>
+
+        <h3>System Diagram</h3>
+        <div class="mermaid">
+            graph TD
+                User -->|PDF Upload| UI[Frontend UI]
+                UI --> Processor[PDF Processor]
+                Processor -->|OCR / Extraction| Text[Raw Text]
+                Text --> Metadata[Metadata Extractor]
+                Text --> Summarizer[Summarizer Agent]
+                Metadata --> Merger[Metadata Merger]
+                Summarizer --> Output
+                Merger --> Output[Final Output: JSON + Summary]
+        </div>
+
+        <h3>Agent Breakdown</h3>
+
+        <h4>PDF Processor</h4>
+        <p>Handles hybrid extraction with both structured and OCR-based fallbacks. Uses PyMuPDF, PyPDF2, and Mistral OCR in parallel and scores the outputs for quality.</p>
+
+        <h4>Mistral OCR</h4>
+        <p>State-of-the-art OCR with Markdown-structured output. Useful for forms, scanned reports, and mixed-content PDFs.</p>
+
+        <h4>Metadata Extractor Agent</h4>
+        <p>Uses document-type classification + style-specific prompts to extract metadata. Fallbacks to embedded PDF info.</p>
+
+        <h4>Summarizer Agent</h4>
+        <p>Support for multiple summary types using engineered prompts.</p>
+
+        <h4>Cost and Speed Agents</h4>
+        <p>Calculates and logs token-level usage and latency in real time.</p>
+
+        <hr>
+
+        <h2>Key Learnings & Reflections</h2>
+        <ul>
+            <li><strong>LPUs are game-changing</strong>: The speed and cost benefits are transformative for production deployments.</li>
+            <li><strong>Hybrid extraction works</strong>: Combining traditional PDF tools with modern OCR gives us the best of both worlds.</li>
+            <li><strong>Prompt engineering matters</strong>: Carefully crafted prompts per document type significantly improve extraction quality.</li>
+            <li><strong>Cost tracking is crucial</strong>: Real-time token counting helps optimize prompt length and model selection.</li>
+        </ul>
+    </article>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-python.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        // Check referrer and update back link
+        document.addEventListener('DOMContentLoaded', function() {
+            const referrer = document.referrer;
+            const backLink = document.getElementById('back-link');
+            
+            if (referrer.includes('all-projects.html')) {
+                backLink.href = 'all-projects.html';
+            }
+        });
+
+        // Initialize Mermaid
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: 'neutral',
+            flowchart: {
+                curve: 'basis',
+                padding: 20
+            }
+        });
+
+        // Particle system animation
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas size
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+        
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Particle class
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = Math.random() * 0.2 - 0.1;
+                this.vy = Math.random() * 0.2 - 0.1;
+                this.radius = Math.random() * 2 + 1;
+                this.opacity = Math.random() * 0.5 + 0.2;
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+            
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(97, 218, 251, ${this.opacity})`;
+                ctx.fill();
+            }
+        }
+        
+        // Create particles
+        const particles = Array.from({ length: 100 }, () => new Particle());
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+            
+            // Draw connections
+            particles.forEach((p1, i) => {
+                particles.slice(i + 1).forEach(p2 => {
+                    const dx = p1.x - p2.x;
+                    const dy = p1.y - p2.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 100) {
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = `rgba(97, 218, 251, ${0.2 * (1 - distance / 100)})`;
+                        ctx.stroke();
+                    }
+                });
+            });
+        }
+        
+        animate();
+    </script>
+</body>
+</html> 

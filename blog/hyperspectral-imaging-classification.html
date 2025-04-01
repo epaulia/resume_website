@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detecting Alzheimer's with Hyperspectral Imaging | Eugene Paulia</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css">
+    <style>
+        :root {
+            --primary: #2a3b4c;
+            --secondary: #5d7a98;
+            --accent: #61dafb;
+            --light: #f5f8fa;
+            --dark: #1a1a2e;
+            --text: #333;
+            --text-light: #666;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Mona Sans, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .blog-header {
+            position: relative;
+            height: 60vh;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background-color: var(--dark);
+        }
+        
+        #particles-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: white;
+            max-width: 800px;
+            padding: 0 2rem;
+        }
+        
+        .blog-date {
+            font-size: 1rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            letter-spacing: 1px;
+        }
+        
+        .blog-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+        
+        .blog-author {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .blog-tags {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .blog-tag {
+            background-color: rgba(97, 218, 251, 0.2);
+            color: var(--accent);
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .blog-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+        
+        .blog-content p {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+            line-height: 1.8;
+        }
+        
+        .blog-content strong {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .blog-content hr {
+            margin: 2rem 0;
+            border: none;
+            border-top: 2px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .blog-content h2 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin: 3rem 0 1.5rem;
+            position: relative;
+        }
+        
+        .blog-content h3 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin: 2rem 0 1rem;
+        }
+        
+        .blog-content ul, .blog-content ol {
+            margin: 1.5rem 0;
+            padding-left: 2rem;
+        }
+        
+        .blog-content li {
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+        }
+        
+        .highlight {
+            background-color: rgba(97, 218, 251, 0.1);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            color: var(--primary);
+            font-weight: 500;
+        }
+        
+        .checkmark {
+            color: #4CAF50;
+            margin-left: 0.5rem;
+        }
+        
+        code {
+            background-color: #f4f4f4;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Fira Code', Mona Sans, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background-color: #f8f8f8;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .back-to-home {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            z-index: 100;
+            background-color: white;
+            color: var(--primary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .back-to-home:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            color: var(--accent);
+        }
+        
+        @media (max-width: 768px) {
+            .blog-title {
+                font-size: 2.5rem;
+            }
+            
+            .blog-content {
+                padding: 2rem 1.5rem;
+            }
+            
+            .back-to-home {
+                top: 1rem;
+                left: 1rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html#projects" class="back-to-home" id="back-link">
+        <i class="fas fa-arrow-left"></i>
+        Back to Projects
+    </a>
+    
+    <header class="blog-header">
+        <canvas id="particles-canvas"></canvas>
+        <div class="header-content">
+            <div class="blog-date">March 2024</div>
+            <h1 class="blog-title">Detecting Alzheimer's with Hyperspectral Imaging</h1>
+            <div class="blog-author">by Eugene Paulia</div>
+            <div class="blog-tags">
+                <span class="blog-tag">Machine Learning</span>
+                <span class="blog-tag">Medical Imaging</span>
+                <span class="blog-tag">Deep Learning</span>
+                <span class="blog-tag">Python</span>
+            </div>
+        </div>
+    </header>
+    
+    <article class="blog-content">
+        <p>At GroupLabs, we recently partnered with the Hotchkiss Brain Institute to explore a challenging yet promising problem: using <strong>hyperspectral imaging (HSI)</strong> of blood samples to detect <strong>Alzheimer's disease</strong>.</p>
+
+        <p>The task? Binary classification — predicting whether a patient shows signs of Alzheimer's (1) or not (0), based on spectral data.</p>
+
+        <hr>
+
+        <h2>Why Hyperspectral Imaging?</h2>
+        <p>HSI captures rich spectral information across many wavelengths. This depth of data opens doors to subtle biomarker detection in blood samples — a less invasive diagnostic path compared to traditional methods. But with such high-dimensional data comes noise, redundancy, and a serious need for preprocessing.</p>
+
+        <hr>
+
+        <h2>Preprocessing Strategy</h2>
+        <p>We leaned heavily into signal preprocessing before diving into modeling. Here's what we experimented with:</p>
+        <ul>
+            <li><strong>MiniRocket</strong> to extract thousands of time-series features from spectral sequences</li>
+            <li><strong>PLS-DA</strong> to reduce those features down to 30 most informative components</li>
+            <li><strong>Gaussian smoothing</strong> with sigma = 2 to denoise the data</li>
+            <li><strong>MinMax scaling</strong> to normalize the signal values between 0 and 1</li>
+        </ul>
+        <p>While some of these steps were applied globally due to data limitations, our long-term goal is to preprocess per subject to prevent leakage.</p>
+
+        <h2>Modeling Approaches</h2>
+        <p>We explored two primary tracks:</p>
+
+        <h3>Classical Ensemble Models</h3>
+        <p>These worked surprisingly well. We tested:</p>
+        <ul>
+            <li><strong>Random Forest</strong> <span class="checkmark">✓</span></li>
+            <li><strong>LightGBM</strong></li>
+            <li><strong>XGBoost</strong></li>
+        </ul>
+        <p>Even without respecting temporal structure, Random Forest consistently reached <strong>96–98% accuracy</strong> — beating early-stage deep models.</p>
+
+        <p>We used <code>GridSearchCV</code> to explore hyperparameters like:</p>
+        <pre><code class="language-python">param_grid = {
+    'n_estimators': [200, 400, 800],
+    'max_depth': [10, 40, 100],
+    'min_samples_split': [5, 10],
+    'min_samples_leaf': [2, 4]
+}</code></pre>
+
+        <p>The best-performing configuration was:</p>
+        <pre><code class="language-python">{
+    'n_estimators': 400,
+    'max_depth': 10,
+    'min_samples_split': 5,
+    'min_samples_leaf': 2
+}</code></pre>
+
+        <p>We validated this setup using 5-fold cross-validation and evaluated metrics like AUC, log loss, and F1-score per class. <strong>Gaussian</strong> and <strong>Savitzky–Golay</strong> filters were also tested as part of denoising pipelines, and visualizations of loss versus number of trees showed convergence around 200–300 trees.</p>
+
+        <h3>Deep Learning</h3>
+        <p>We prototyped:</p>
+        <ul>
+            <li>RNNs, GRUs, LSTMs</li>
+            <li>HIVE-COTE 2.0 (hybrid ensemble for time-series)</li>
+            <li>Hyperparameter tuning with <strong>Keras Tuner</strong></li>
+            <li>Optimizers: <strong>Adam</strong>, <strong>SGD</strong></li>
+            <li>Loss functions: <strong>Binary Crossentropy</strong>, <strong>Hinge</strong></li>
+            <li>Regularization: <strong>L2</strong>, Dropout (0.2–0.5)</li>
+            <li>TimeDistributed Dense layers for sequential prediction</li>
+            <li>Scaling & smoothing: Gaussian filter, MinMax scaling</li>
+            <li>Sliding window & TimeSeriesSplit cross-validation</li>
+        </ul>
+
+        <p>For GRU, LSTM, and RNN architectures, we used TensorFlow/Keras and experimented with 1–3 layers, each configured to return sequences, followed by TimeDistributed dense outputs. Extensive hyperparameter searches were carried out using <strong>RandomSearch</strong> via <code>keras_tuner</code>, optimizing for metrics like accuracy, precision, recall, and F1-score.</p>
+
+        <p>Early results were underwhelming due to compute constraints. But with new access to HPC resources, we plan to revisit this pipeline soon.</p>
+
+        <hr>
+
+        <h2>Key Learnings & Reflections</h2>
+        <ul>
+            <li><strong>Data Leakage is real</strong>: Global transformations inflated performance. We need per-subject preprocessing to be production-ready.</li>
+            <li><strong>More isn't always better</strong>: Reducing from 30 to 10 time points may not hurt performance, and would streamline modeling.</li>
+            <li><strong>Outlier impact</strong>: One subject consistently degraded model performance. It's an opportunity for deeper exploratory data analysis.</li>
+            <li><strong>Simplicity scales</strong>: Random Forest's strong performance was a reminder that interpretability and robustness often win — especially with small datasets.</li>
+        </ul>
+    </article>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-python.min.js"></script>
+    <script>
+        // Check referrer and update back link
+        document.addEventListener('DOMContentLoaded', function() {
+            const referrer = document.referrer;
+            const backLink = document.getElementById('back-link');
+            
+            if (referrer.includes('all-projects.html')) {
+                backLink.href = 'all-projects.html';
+            }
+        });
+
+        // Particle system animation
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas size
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+        
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        // Particle class
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = Math.random() * 0.2 - 0.1;
+                this.vy = Math.random() * 0.2 - 0.1;
+                this.radius = Math.random() * 2 + 1;
+                this.opacity = Math.random() * 0.5 + 0.2;
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+            
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(97, 218, 251, ${this.opacity})`;
+                ctx.fill();
+            }
+        }
+        
+        // Create particles
+        const particles = Array.from({ length: 100 }, () => new Particle());
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+            
+            // Draw connections
+            particles.forEach((p1, i) => {
+                particles.slice(i + 1).forEach(p2 => {
+                    const dx = p1.x - p2.x;
+                    const dy = p1.y - p2.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 100) {
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = `rgba(97, 218, 251, ${0.2 * (1 - distance / 100)})`;
+                        ctx.stroke();
+                    }
+                });
+            });
+        }
+        
+        animate();
+    </script>
+</body>
+</html> 

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects | Eugene Paulia</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2a3b4c;
+            --secondary: #5d7a98;
+            --accent: #61dafb;
+            --light: #f5f8fa;
+            --dark: #1a1a2e;
+            --text: #333;
+            --text-light: #666;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Mona Sans, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--text);
+            line-height: 1.6;
+            padding: 6rem 0;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+        
+        .header {
+            margin-bottom: 6rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header h1 {
+            font-size: 5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            letter-spacing: -2px;
+            line-height: 1.1;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .header p {
+            font-size: 1.4rem;
+            color: var(--text-light);
+            max-width: 600px;
+            font-weight: 400;
+            letter-spacing: -0.5px;
+        }
+        
+        .blog-grid {
+            display: grid;
+            gap: 6rem;
+        }
+        
+        .blog-item {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+            padding-bottom: 6rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease forwards;
+            animation-delay: calc(var(--item-index) * 0.2s);
+        }
+        
+        .blog-content {
+            display: flex;
+            flex-direction: column;
+            transition: transform 0.3s ease;
+        }
+        
+        .blog-item:hover .blog-content {
+            transform: translateY(-8px);
+        }
+        
+        .blog-date {
+            font-size: 1.1rem;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            letter-spacing: -0.3px;
+        }
+        
+        .blog-title {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            letter-spacing: -1px;
+        }
+        
+        .blog-title:hover {
+            color: var(--accent);
+            transform: translateX(10px);
+        }
+        
+        .blog-author {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            width: fit-content;
+        }
+        
+        .author-image {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .author-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        
+        .blog-author:hover .author-image img {
+            transform: scale(1.1);
+        }
+        
+        .author-name {
+            font-size: 1.1rem;
+            color: var(--text);
+            font-weight: 600;
+            letter-spacing: -0.3px;
+        }
+        
+        .author-role {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            letter-spacing: -0.2px;
+        }
+        
+        .blog-description {
+            font-size: 1.25rem;
+            color: var(--text-light);
+            margin-bottom: 2.5rem;
+            line-height: 1.7;
+            letter-spacing: -0.3px;
+        }
+        
+        .read-more {
+            display: inline-flex;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: 500;
+            font-size: 1.1rem;
+            letter-spacing: -0.3px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            align-self: flex-start;
+            box-shadow: 0 4px 15px rgba(42, 59, 76, 0.15);
+        }
+        
+        .read-more:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 8px 25px rgba(42, 59, 76, 0.2);
+            background-color: var(--accent);
+        }
+        
+        .back-to-home {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            z-index: 100;
+            background-color: rgba(255, 255, 255, 0.9);
+            color: var(--primary);
+            padding: 0.9rem 1.8rem;
+            border-radius: 30px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-weight: 500;
+            font-size: 1.1rem;
+            letter-spacing: -0.3px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .back-to-home:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+            color: var(--accent);
+        }
+        
+        .back-to-home i {
+            transition: transform 0.3s ease;
+        }
+        
+        .back-to-home:hover i {
+            transform: translateX(-4px);
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 4rem 0;
+            }
+            
+            .header {
+                margin-bottom: 4rem;
+            }
+            
+            .header h1 {
+                font-size: 3.5rem;
+                letter-spacing: -1.5px;
+            }
+            
+            .header p {
+                font-size: 1.2rem;
+            }
+            
+            .blog-title {
+                font-size: 2.5rem;
+                letter-spacing: -0.8px;
+            }
+            
+            .blog-description {
+                font-size: 1.15rem;
+            }
+            
+            .blog-item {
+                gap: 1.5rem;
+                padding-bottom: 4rem;
+            }
+            
+            .back-to-home {
+                top: 1rem;
+                left: 1rem;
+                padding: 0.7rem 1.4rem;
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html#projects" class="back-to-home">
+        <i class="fas fa-arrow-left"></i>
+        Back to Home
+    </a>
+    
+    <div class="container">
+        <header class="header">
+            <h1>Projects</h1>
+            <p>Exploring the intersection of AI, machine learning, and real-world impact through innovative solutions.</p>
+        </header>
+        
+        <div class="blog-grid">
+            <article class="blog-item" style="--item-index: 0">
+                <div class="blog-content">
+                    <div class="blog-date">2024</div>
+                    <a href="anomaly-detection-system.html" class="blog-title">ARIMA-based Anomaly Detection System</a>
+                    <div class="blog-author">
+                        <div class="author-image">
+                            <img src="../bw-profile-pic.jpg" alt="Eugene Paulia">
+                        </div>
+                        <div>
+                            <div class="author-name">Eugene Paulia</div>
+                            <div class="author-role">Data Scientist</div>
+                        </div>
+                    </div>
+                    <p class="blog-description">Developed a real-time anomaly detection system for equipment monitoring using ARIMA models, reducing maintenance costs by 11% through predictive maintenance workflows.</p>
+                    <a href="anomaly-detection-system.html" class="read-more">Read more →</a>
+                </div>
+            </article>
+
+            <article class="blog-item" style="--item-index: 1">
+                <div class="blog-content">
+                    <div class="blog-date">2025</div>
+                    <a href="pdf-ai-agent.html" class="blog-title">PDF AI Agent</a>
+                    <div class="blog-author">
+                        <div class="author-image">
+                            <img src="../bw-profile-pic.jpg" alt="Eugene Paulia">
+                        </div>
+                        <div>
+                            <div class="author-name">Eugene Paulia</div>
+                            <div class="author-role">ML Engineer</div>
+                        </div>
+                    </div>
+                    <p class="blog-description">A document analysis pipeline using LLMs, OCR. Features include text extraction from scanned PDFs, document type detection, metadata extraction, and multi-style summarization. Built with Groq LPUs for faster inference and cost reduction.</p>
+                    <a href="pdf-ai-agent.html" class="read-more">Read more →</a>
+                </div>
+            </article>
+
+            <article class="blog-item" style="--item-index: 2">
+                <div class="blog-content">
+                    <div class="blog-date">2024</div>
+                    <a href="hyperspectral-imaging-classification.html" class="blog-title">Hyperspectral Imaging Classification</a>
+                    <div class="blog-author">
+                        <div class="author-image">
+                            <img src="../bw-profile-pic.jpg" alt="Eugene Paulia">
+                        </div>
+                        <div>
+                            <div class="author-name">Eugene Paulia</div>
+                            <div class="author-role">ML Engineer</div>
+                        </div>
+                    </div>
+                    <p class="blog-description">Led a project with Hotchkiss Brain Institute, developing neural network architectures for hyperspectral imaging data that achieved 98% classification accuracy.</p>
+                    <a href="hyperspectral-imaging-classification.html" class="read-more">Read more →</a>
+                </div>
+            </article>
+        </div>
+    </div>
+</body>
+</html> 
