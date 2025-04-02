@@ -288,34 +288,16 @@
 
         <h2>Implementation Details</h2>
 
-        <h3>Stage 1: Document Conversion and Preparation</h3>
-        <pre><code class="language-python"># Certificate handling for secure connections
-cafile = certifi.where()
-with open(r"C:\Users\epaulia\OneDrive - Cenovus Energy Inc\Documents\Pdf to Excel\Cenovus Root CA.crt", 'rb') as infile:
-    customca = infile.read()
-with open(cafile, 'rb') as existing_file:
-    current_certs = existing_file.read()
-if customca not in current_certs:
-    with open(cafile, 'ab') as f:
-            f.write(customca)
-
-# Convert PDF to high-resolution images
-images = convert_from_path(r"C:\Users\epaulia\OneDrive - Cenovus Energy Inc\Documents\Pdf to Excel\Inv1050_ 1800000044 -CFA-2024-03-CEN.pdf")
-
-# Save each page as a separate image for processing
-for i, page in enumerate(images):
-    page.save(f"image_{i}.jpg", 'JPEG')</code></pre>
-
-        <h3>Stage 2: Table Detection with Hugging Face Transformers</h3>
+        <h3>Stage 1: Table Detection with Hugging Face Transformers</h3>
         <pre><code class="language-python"># Initialize Hugging Face pipeline for object detection
-pipe = pipeline("object-detection", model=r"C:\Users\epaulia\OneDrive - Cenovus Energy Inc\Documents\Pdf to Excel\local_model_dir")
+pipe = pipeline("object-detection", model=r"...\Pdf to Excel\local_model_dir")
 
 # Alternative approach with direct model loading for more control
-processor = AutoImageProcessor.from_pretrained(r"C:\Users\epaulia\OneDrive - Cenovus Energy Inc\Documents\Pdf to Excel\local_model_dir")
-model = AutoModelForObjectDetection.from_pretrained(r"C:\Users\epaulia\OneDrive - Cenovus Energy Inc\Documents\Pdf to Excel\local_model_dir")
+processor = AutoImageProcessor.from_pretrained(r"...\Pdf to Excel\local_model_dir")
+model = AutoModelForObjectDetection.from_pretrained(r"...\Pdf to Excel\local_model_dir")
 
 # Load image for processing
-image = Image.open(r"C:\Users\epaulia\OneDrive - Cenovus Energy Inc\Documents\Pdf to Excel\image_1.jpg").convert("RGB")
+image = Image.open(r"...\Pdf to Excel\image_1.jpg").convert("RGB")
 
 # Prepare image for model inference
 inputs = processor(images=image, return_tensors="pt")
@@ -336,7 +318,7 @@ for score, label, box in zip(results["scores"], results["labels"], results["boxe
 cropped_img = image.crop(box)
 cropped_img.save("cropped_img.jpg")</code></pre>
 
-        <h3>Stage 3: Image Preprocessing for OCR Optimization</h3>
+        <h3>Stage 2: Image Preprocessing for OCR Optimization</h3>
         <pre><code class="language-python">def preprocess_image(image_path):
     # Load image and convert to grayscale
     image = cv2.imread(image_path)
@@ -358,7 +340,7 @@ cropped_img.save("cropped_img.jpg")</code></pre>
 # Apply preprocessing to cropped table image
 preprocessed_image = preprocess_image("cropped_img.jpg")</code></pre>
 
-        <h3>Stage 4: OCR and Text Extraction</h3>
+        <h3>Stage 3: OCR and Text Extraction</h3>
         <pre><code class="language-python">def perform_ocr(preprocessed_image):
     # Configure Tesseract for table content
     config = '--psm 12 --oem 3'  # Page segmentation mode 12 (sparse text) with LSTM OCR Engine
@@ -388,7 +370,7 @@ for i in range(len(ocr_data['text'])):
 if current_line:
     lines.append(' '.join(current_line))</code></pre>
 
-        <h3>Stage 5: Pattern Extraction and Data Structuring</h3>
+        <h3>Stage 4: Pattern Extraction and Data Structuring</h3>
         <pre><code class="language-python"># Define extraction pattern for names (example - can be customized for different data)
 name_pattern = r'\b[A-Z][A-Za-z\'`-]+, [A-Z][A-Za-z\'`-]+\b'
 

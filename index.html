@@ -1075,65 +1075,66 @@
         @media (max-width: 768px) {
             .skills-container {
                 height: 600px;
-                margin-top: 1rem;
-                background-color: rgba(245, 248, 250, 0.9);
-                position: relative;
+                background-color: rgba(255, 255, 255, 0.95);
             }
-            
+
             .skills-legend {
                 position: absolute;
-                top: 20px;
-                right: 20px;
-                background-color: rgba(255, 255, 255, 0.8);
-                padding: 15px;
-                border-radius: 8px;
-                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-                z-index: 2;
-                max-height: 80vh;
-                overflow-y: auto;
+                top: 10px;
+                right: 10px;
+                width: 120px;
+                padding: 8px;
+                font-size: 0.9em;
             }
-            
-            .legend-item {
-                padding: 4px 8px;
-                margin-bottom: 8px;
-            }
-            
+
             .legend-color {
                 width: 12px;
                 height: 12px;
-                margin-right: 8px;
+                margin-right: 6px;
             }
-            
+
+            .legend-item {
+                margin: 4px 0;
+                font-size: 0.85em;
+            }
+
             .skill-info-panel {
-                bottom: 20px;
-                left: 20px;
-                background-color: rgba(255, 255, 255, 0.95);
-                padding: 15px 20px;
-                border-radius: 10px;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-                width: 300px;
-                transition: all 0.3s ease;
-                z-index: 2;
-                opacity: 1;
+                position: absolute;
+                left: 10px;
+                bottom: 10px;
+                width: auto;
+                max-width: 250px;
+                padding: 6px 10px;
+                margin: 0;
+                background: rgba(255, 255, 255, 0.95);
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                border-radius: 6px;
                 transform: translateY(0);
+                transition: all 0.3s ease-out;
+                z-index: 1000;
+                height: 60px;
+                min-height: 60px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
             }
-            
+
             .skill-info-panel h3 {
-                font-size: 1.1rem;
-                margin-bottom: 8px;
+                font-size: 0.8em;
+                margin: 0 0 4px 0;
+                line-height: 1.2;
             }
-            
-            .skill-info-panel p {
-                font-size: 0.9rem;
-                line-height: 1.4;
+
+            .skill-info-panel .skill-description {
+                font-size: 0.75em;
+                margin: 0;
+                line-height: 1.2;
+                display: block;
+                opacity: 0.8;
             }
-            
+
             .skill-node-label {
-                font-size: 0.75rem;
-                padding: 2px 4px;
-                background-color: rgba(255, 255, 255, 0.98);
-                border-radius: 3px;
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+                font-size: 0.7em;
             }
         }
 
@@ -1745,7 +1746,7 @@
         skillInfoPanel.className = 'skill-info-panel';
         skillInfoPanel.innerHTML = `
             <div class="skill-info-content">
-                <h3>Hover over a skill to see details</h3>
+                <h3>${window.innerWidth <= 768 ? 'Click a skill to see details' : 'Hover over a skill to see details'}</h3>
                 <p class="skill-description"></p>
             </div>
         `;
@@ -1918,6 +1919,9 @@
             title.textContent = skill.name;
             description.textContent = skill.description;
             
+            // Add active class for mobile slide-up animation
+            panel.classList.add('active');
+            
             // Highlight this node and its category
             skillNodes.children.forEach(node => {
                 if (node.userData.name === skill.name) {
@@ -1943,11 +1947,17 @@
             });
             
             const panel = document.querySelector('.skill-info-panel');
-            const title = panel.querySelector('h3');
-            const description = panel.querySelector('.skill-description');
+            panel.classList.remove('active');
             
-            title.textContent = 'Hover over a skill to see details';
-            description.textContent = '';
+            // Reset panel content after animation
+            setTimeout(() => {
+                const title = panel.querySelector('h3');
+                const description = panel.querySelector('.skill-description');
+                if (!panel.classList.contains('active')) {
+                    title.textContent = window.innerWidth <= 768 ? 'Click a skill to see details' : 'Hover over a skill to see details';
+                    description.textContent = '';
+                }
+            }, 300);
         }
         
         // Animation function for skills graph
@@ -2214,13 +2224,13 @@
         function updateCameraForMobile() {
             const isMobile = window.innerWidth <= 768;
             if (isMobile) {
-                // Adjust camera position for mobile - bring it closer
+                // Adjust camera position for mobile - bring it closer but maintain visibility
                 skillsCamera.position.z = 35;
                 targetCameraZ = 35;
                 targetCameraPosition.z = 35;
                 
-                // Adjust category radius for mobile - make it smaller
-                const categoryRadius = 8;
+                // Adjust category radius for mobile - keep it larger for better visibility
+                const categoryRadius = 15;
                 Object.keys(categoryColors).forEach((category, index) => {
                     const angle = (index / categoryCount) * Math.PI * 2;
                     categoryCenters[category].x = categoryRadius * Math.cos(angle);
@@ -2228,21 +2238,21 @@
                     categoryCenters[category].z = 0;
                 });
                 
-                // Adjust node sizes for mobile - make them larger
+                // Adjust node sizes for mobile
                 skillNodes.children.forEach(node => {
-                    node.scale.set(0.8, 0.8, 0.8);
-                    node.userData.originalScale.set(0.8, 0.8, 0.8);
+                    node.scale.set(1.2, 1.2, 1.2);
+                    node.userData.originalScale.set(1.2, 1.2, 1.2);
                 });
                 
-                // Adjust boundaries for mobile - make them smaller
-                BOUNDARY_X = 15;
-                BOUNDARY_Y = 15;
-                BOUNDARY_Z = 15;
+                // Adjust boundaries to keep nodes more visible
+                BOUNDARY_X = 20;
+                BOUNDARY_Y = 20;
+                BOUNDARY_Z = 20;
                 
-                // Reset node positions to ensure they're visible
+                // Reset node positions with larger radius
                 skillNodes.children.forEach(node => {
                     const categoryCenter = node.userData.categoryCenter;
-                    const radius = 3;
+                    const radius = 5;
                     const theta = Math.random() * Math.PI * 2;
                     const phi = Math.acos(2 * Math.random() - 1);
                     
@@ -2260,11 +2270,13 @@
         let lastTouchTime = 0;
         let touchCount = 0;
         let selectedNode = null;
-        
+        let touchStartTime = 0;
+
         skillsCanvas.addEventListener('touchstart', (event) => {
             isTouching = true;
             touchStartX = event.touches[0].clientX;
             touchStartY = event.touches[0].clientY;
+            touchStartTime = Date.now();
             const currentTime = Date.now();
             
             // Check for node selection
@@ -2321,8 +2333,8 @@
             const deltaY = touchY - touchStartY;
             
             // Smoother rotation with reduced sensitivity
-            skillNodes.rotation.y += deltaX * 0.003;
-            skillNodes.rotation.x += deltaY * 0.003;
+            skillNodes.rotation.y += deltaX * 0.002;
+            skillNodes.rotation.x += deltaY * 0.002;
             
             touchStartX = touchX;
             touchStartY = touchY;
@@ -2330,8 +2342,17 @@
             event.preventDefault();
         });
         
-        skillsCanvas.addEventListener('touchend', () => {
+        skillsCanvas.addEventListener('touchend', (event) => {
+            const touchEndTime = Date.now();
+            const touchDuration = touchEndTime - touchStartTime;
+            
             isTouching = false;
+            
+            // If it was a short tap and we have a selected node, keep it selected
+            if (touchDuration < 300 && selectedNode) {
+                return;
+            }
+            
             selectedNode = null;
             skillsCanvas.style.cursor = 'default';
             
@@ -2341,6 +2362,8 @@
                     resetNodes();
                 }
             }, 2000);
+            
+            event.preventDefault();
         });
 
         // Update mobile settings on orientation change
@@ -2489,6 +2512,18 @@
                 navLinks.classList.remove('active');
                 body.style.overflow = '';
             });
+        });
+
+        // Add touch event handler for closing the panel when tapping outside
+        document.addEventListener('touchstart', (event) => {
+            const panel = document.querySelector('.skill-info-panel');
+            const skillsContainer = document.querySelector('.skills-container');
+            
+            if (panel.classList.contains('active') && 
+                !panel.contains(event.target) && 
+                !skillsContainer.contains(event.target)) {
+                resetNodes();
+            }
         });
     </script>
 </body>
