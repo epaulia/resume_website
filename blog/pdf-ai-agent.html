@@ -3,9 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: https:; font-src 'self' https://cdnjs.cloudflare.com; connect-src 'self';">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     <title>PDF AI Agent: Production-Grade Document Analysis | Eugene Paulia</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mermaid-js/mermaid-cli/dist/mermaid.min.css">
     <style>
         :root {
@@ -317,7 +321,7 @@
         <h2>Under the hood</h2>
         <p>This demo runs on a real production-grade stack:</p>
         <ul>
-            <li><strong>CI/CD</strong>: Deployed through GitHub Actions to Azure Web Apps <span class="checkmark">✓</span></li>
+            <li><strong>CI/CD</strong>: Deployed through GitHub Actions to Azure Web Apps</li>
             <li><strong>LLMs</strong>: Swappable LLM backends (OpenAI or GroupLabs, depending on speed/price needs)</li>
             <li><strong>Cost-aware</strong>: Built-in cost tracking agents for every token processed</li>
             <li><strong>Text extraction</strong>: Hybrid engine with:
@@ -393,17 +397,23 @@
         </ul>
     </article>
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-python.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js" integrity="sha512-axJX7DJduStuBB8ePC8ryGzacZPr3rdLaIDZitiEgWWk2gsXxEFlm4UW0iNzj2h3wp5mOylgHAzBzM4nRSvTZA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-python.min.js" integrity="sha512-lPbwGiPWBLOs6Vq0Kkm4T/oYPQwXWqm8KkZTXvxGZqg4TjGZVUVJV2a6Z1rI04yBXTKJ4HhU/xEzoyHvTWFLg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js" integrity="sha384-wKB/4zz4k4XbBwZFpugirhZ6OG7j4yEy8jGPGJ7RqPXR8Qrj3xM3eZgXNEq0qIZV" crossorigin="anonymous"></script>
     <script>
-        // Check referrer and update back link
+        // Check referrer and update back link with proper URL validation
         document.addEventListener('DOMContentLoaded', function() {
-            const referrer = document.referrer;
             const backLink = document.getElementById('back-link');
-            
-            if (referrer.includes('all-projects.html')) {
-                backLink.href = 'all-projects.html';
+            try {
+                const referrer = new URL(document.referrer);
+                // Only allow referrers from our own domain
+                if (referrer.hostname === window.location.hostname && 
+                    referrer.pathname.endsWith('all-projects.html')) {
+                    backLink.href = 'all-projects.html';
+                }
+            } catch (e) {
+                // Invalid or no referrer, keep default link
+                console.log('Using default back link');
             }
         });
 
