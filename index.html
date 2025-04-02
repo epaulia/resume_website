@@ -2127,97 +2127,128 @@
         
         let selectedResumeType = null;
         
-        downloadResumeBtn.addEventListener('click', (e) => {
-            e.preventDefault();
-            resumeModal.classList.add('active');
-            document.body.style.overflow = 'hidden'; // Prevent scrolling when modal is open
-            
-            // Add animation for modal elements
-            setTimeout(() => {
-                resumeModal.querySelector('.modal-content').style.transform = 'scale(1)';
-                resumeModal.querySelector('.modal-content').style.opacity = '1';
-            }, 10);
+        // Add both click and touchend events for better mobile support
+        ['click', 'touchend'].forEach(eventType => {
+            downloadResumeBtn.addEventListener(eventType, (e) => {
+                e.preventDefault();
+                e.stopPropagation(); // Prevent event bubbling
+                resumeModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+                
+                // Add animation for modal elements
+                setTimeout(() => {
+                    resumeModal.querySelector('.modal-content').style.transform = 'scale(1)';
+                    resumeModal.querySelector('.modal-content').style.opacity = '1';
+                }, 10);
+            });
         });
-        
+
+        // Prevent default touchstart behavior
+        downloadResumeBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+        });
+
         modalClose.addEventListener('click', () => {
             closeModal();
         });
-        
-        // Close modal if clicked outside
-        resumeModal.addEventListener('click', (e) => {
-            if (e.target === resumeModal) {
-                closeModal();
-            }
+
+        // Close modal if clicked/touched outside
+        ['click', 'touchend'].forEach(eventType => {
+            resumeModal.addEventListener(eventType, (e) => {
+                if (e.target === resumeModal) {
+                    closeModal();
+                }
+            });
         });
-        
+
         function closeModal() {
             resumeModal.querySelector('.modal-content').style.transform = 'scale(0.8)';
             resumeModal.querySelector('.modal-content').style.opacity = '0';
             
             setTimeout(() => {
                 resumeModal.classList.remove('active');
-                document.body.style.overflow = 'auto'; // Re-enable scrolling
+                document.body.style.overflow = 'auto';
             }, 300);
         }
-        
-        // Handle resume option selection
+
+        // Handle resume option selection with touch support
         resumeOptions.forEach(option => {
-            option.addEventListener('click', () => {
-                // Remove active class from all options
-                resumeOptions.forEach(opt => opt.classList.remove('active'));
-                
-                // Add active class to clicked option
-                option.classList.add('active');
-                
-                // Enable download button
-                finalDownloadBtn.removeAttribute('disabled');
-                
-                // Set selected resume type
-                selectedResumeType = option.getAttribute('data-type');
-                
-                // Add interactive 3D effect on hover
-                option.style.transform = 'translateY(-5px) rotateX(5deg)';
-                setTimeout(() => {
-                    option.style.transform = 'translateY(-5px)';
-                }, 200);
+            ['click', 'touchend'].forEach(eventType => {
+                option.addEventListener(eventType, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    // Remove active class from all options
+                    resumeOptions.forEach(opt => opt.classList.remove('active'));
+                    
+                    // Add active class to clicked/touched option
+                    option.classList.add('active');
+                    
+                    // Enable download button
+                    finalDownloadBtn.removeAttribute('disabled');
+                    
+                    // Set selected resume type
+                    selectedResumeType = option.getAttribute('data-type');
+                    
+                    // Add interactive effect
+                    option.style.transform = 'translateY(-5px) rotateX(5deg)';
+                    setTimeout(() => {
+                        option.style.transform = 'translateY(-5px)';
+                    }, 200);
+                });
             });
             
-            // Add hover effect
-            option.addEventListener('mousemove', (e) => {
-                if (option.classList.contains('active')) return;
-                
-                const rect = option.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
-                
-                const rotateX = (y - centerY) / 10;
-                const rotateY = (centerX - x) / 10;
-                
-                option.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
+            // Prevent default touchstart behavior
+            option.addEventListener('touchstart', (e) => {
+                e.preventDefault();
             });
             
-            option.addEventListener('mouseleave', () => {
-                if (!option.classList.contains('active')) {
-                    option.style.transform = 'none';
+            // Add hover effect for non-touch devices
+            if (!('ontouchstart' in window)) {
+                option.addEventListener('mousemove', (e) => {
+                    if (option.classList.contains('active')) return;
+                    
+                    const rect = option.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+                    
+                    const rotateX = (y - centerY) / 10;
+                    const rotateY = (centerX - x) / 10;
+                    
+                    option.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
+                });
+                
+                option.addEventListener('mouseleave', () => {
+                    if (!option.classList.contains('active')) {
+                        option.style.transform = 'none';
+                    }
+                });
+            }
+        });
+
+        // Handle final download button click with touch support
+        ['click', 'touchend'].forEach(eventType => {
+            finalDownloadBtn.addEventListener(eventType, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                if (selectedResumeType === 'data') {
+                    window.location.href = 'https://drive.google.com/uc?export=download&id=1WXr8yMp_ucsTfBLFZ2599btDAuKtvA9_';
+                } else if (selectedResumeType === 'ai') {
+                    window.location.href = 'https://drive.google.com/uc?export=download&id=1IK5OhDsVwc8-8FoxN6OI5uREnDc3haYE';
                 }
+                
+                // Close modal after download starts
+                setTimeout(closeModal, 500);
             });
         });
-        
-        // Handle final download button click
-        finalDownloadBtn.addEventListener('click', () => {
-            if (selectedResumeType === 'data') {
-                // Download Data Engineer resume
-                window.location.href = 'https://drive.google.com/uc?export=download&id=1WXr8yMp_ucsTfBLFZ2599btDAuKtvA9_';
-            } else if (selectedResumeType === 'ai') {
-                // Download AI Engineer resume
-                window.location.href = 'https://drive.google.com/uc?export=download&id=1IK5OhDsVwc8-8FoxN6OI5uREnDc3haYE';
-            }
-            
-            // Close modal after download starts
-            setTimeout(closeModal, 500);
+
+        // Prevent default touchstart behavior
+        finalDownloadBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
         });
 
         // Mobile-specific camera adjustments
