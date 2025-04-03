@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-MC75SEWB8R"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-MC75SEWB8R');
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
@@ -10,6 +19,7 @@
     <title>Eugene Paulia | Data Scientist & ML Engineer</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="icon" type="image/png" href="favicon.png">
     <style>
         /* Base Styles */
         :root {
@@ -910,6 +920,51 @@
             .skill-node-label {
                 font-size: 0.75rem;
                 padding: 3px 6px;
+            }
+        }
+
+        /* Go Up Button */
+        .go-up-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .go-up-btn.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+
+        .go-up-btn:hover {
+            background-color: var(--accent);
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(97, 218, 251, 0.4);
+        }
+
+        /* Adjust button size on mobile */
+        @media (max-width: 768px) {
+            .go-up-btn {
+                width: 40px;
+                height: 40px;
+                bottom: 20px;
+                right: 20px;
             }
         }
         
@@ -2243,9 +2298,9 @@
                 e.stopPropagation();
                 
                 if (selectedResumeType === 'data') {
-                    window.location.href = 'https://drive.google.com/uc?export=download&id=1WXr8yMp_ucsTfBLFZ2599btDAuKtvA9_';
+                    window.location.href = 'https://drive.google.com/uc?export=download&id=1LPRGQm_pWOrQCACY9jeOtqUSQMSyQOCj';
                 } else if (selectedResumeType === 'ai') {
-                    window.location.href = 'https://drive.google.com/uc?export=download&id=1IK5OhDsVwc8-8FoxN6OI5uREnDc3haYE';
+                    window.location.href = 'https://drive.google.com/uc?export=download&id=1BjPJY_jsqv2HiIjkjgF7vQg5xfLZGrns';
                 }
                 
                 // Close modal after download starts
@@ -2562,6 +2617,43 @@
                 !skillsContainer.contains(event.target)) {
                 resetNodes();
             }
+        });
+    </script>
+    <button id="goUpBtn" class="go-up-btn" aria-label="Go to top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    <script>
+        // Go Up Button functionality
+        const goUpBtn = document.getElementById('goUpBtn');
+
+        // Show/hide button based on scroll position
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 500) {
+                goUpBtn.classList.add('visible');
+            } else {
+                goUpBtn.classList.remove('visible');
+            }
+        });
+
+        // Scroll to top when button is clicked
+        goUpBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // Add touch support for mobile
+        goUpBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevent default touch behavior
+        });
+
+        goUpBtn.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
         });
     </script>
 </body>

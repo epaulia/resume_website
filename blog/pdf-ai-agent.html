@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="X-Frame-Options" content="DENY">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: https:; font-src 'self' https://cdnjs.cloudflare.com; connect-src 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data: https:; font-src 'self' https://cdnjs.cloudflare.com; connect-src 'self'; worker-src 'self' blob:;">
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     <title>PDF AI Agent: Production-Grade Document Analysis | Eugene Paulia</title>
+    <link rel="icon" type="image/svg+xml" href="../favicon.svg">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mermaid-js/mermaid-cli/dist/mermaid.min.css">
@@ -276,6 +277,47 @@
                 font-size: 0.9rem;
             }
         }
+
+        /* Mermaid Diagram Styles */
+        .mermaid {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .mermaid svg {
+            max-width: 100%;
+            height: auto;
+            font-family: 'Mona Sans', system-ui, sans-serif;
+        }
+
+        .mermaid .node rect,
+        .mermaid .node circle,
+        .mermaid .node ellipse,
+        .mermaid .node polygon {
+            fill: #fff;
+            stroke: #333;
+            stroke-width: 2px;
+        }
+
+        .mermaid .edgePath .path {
+            stroke: #333;
+            stroke-width: 1.5px;
+        }
+
+        .mermaid .arrowheadPath {
+            fill: #333;
+        }
+
+        .mermaid .edgeLabel {
+            background-color: white;
+            padding: 4px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
     </style>
 </head>
 <body>
@@ -357,17 +399,33 @@
         <p>At the core of the system is a modular agent-based architecture that makes each component independently testable and swappable.</p>
 
         <h3>System Diagram</h3>
-        <div class="mermaid">
-            graph TD
-                User -->|PDF Upload| UI[Frontend UI]
-                UI --> Processor[PDF Processor]
-                Processor -->|OCR / Extraction| Text[Raw Text]
-                Text --> Metadata[Metadata Extractor]
-                Text --> Summarizer[Summarizer Agent]
-                Metadata --> Merger[Metadata Merger]
-                Summarizer --> Output
-                Merger --> Output[Final Output: JSON + Summary]
-        </div>
+        <pre class="mermaid">
+        graph TD
+            User -->|PDF Upload| Frontend
+            Frontend --> Processor[PDF Processor]
+            Processor -->|OCR / Extraction| Text[Raw Text]
+            Text --> Metadata[Metadata Extractor]
+            Text --> Summarizer[Summarizer Agent]
+            Metadata --> Merger[Metadata Merger]
+            Summarizer --> Output[Final Output]
+            Merger --> Output
+
+            style User fill:#f9f9f9,stroke:#333,stroke-width:2px
+            style Frontend fill:#e1f5fe,stroke:#0288d1,stroke-width:2px
+            style Processor fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+            style Text fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+            style Metadata fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+            style Summarizer fill:#e8eaf6,stroke:#3f51b5,stroke-width:2px
+            style Merger fill:#fce4ec,stroke:#c2185b,stroke-width:2px
+            style Output fill:#fff,stroke:#333,stroke-width:2px
+        </pre>
+
+        <script>
+            mermaid.initialize({ 
+                startOnLoad: true,
+                theme: 'default'
+            });
+        </script>
 
         <h3>Agent Breakdown</h3>
 
@@ -399,7 +457,7 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js" integrity="sha512-axJX7DJduStuBB8ePC8ryGzacZPr3rdLaIDZitiEgWWk2gsXxEFlm4UW0iNzj2h3wp5mOylgHAzBzM4nRSvTZA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-python.min.js" integrity="sha512-lPbwGiPWBLOs6Vq0Kkm4T/oYPQwXWqm8KkZTXvxGZqg4TjGZVUVJV2a6Z1rI04yBXTKJ4HhU/xEzoyHvTWFLg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js" integrity="sha384-wKB/4zz4k4XbBwZFpugirhZ6OG7j4yEy8jGPGJ7RqPXR8Qrj3xM3eZgXNEq0qIZV" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
     <script>
         // Check referrer and update back link with proper URL validation
         document.addEventListener('DOMContentLoaded', function() {

@@ -279,6 +279,51 @@
                 font-size: 1rem;
             }
         }
+        
+        /* Go Up Button */
+        .go-up-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 99;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .go-up-button.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+
+        .go-up-button:hover {
+            background-color: var(--accent);
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(97, 218, 251, 0.4);
+        }
+
+        /* Adjust button size on mobile */
+        @media (max-width: 768px) {
+            .go-up-button {
+                width: 40px;
+                height: 40px;
+                bottom: 20px;
+                right: 20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -404,6 +449,12 @@
             </article>
         </div>
     </div>
+    
+    <!-- Go Up Button -->
+    <button id="goUpButton" class="go-up-button" aria-label="Go to top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
     <script>
         const canvas = document.getElementById('particles-canvas');
         const ctx = canvas.getContext('2d');
@@ -536,6 +587,25 @@
         canvas.addEventListener('touchend', function() {
             mouse.x = null;
             mouse.y = null;
+        });
+
+        // Go Up Button functionality
+        const goUpButton = document.getElementById('goUpButton');
+        
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 500) {
+                goUpButton.classList.add('visible');
+            } else {
+                goUpButton.classList.remove('visible');
+            }
+        });
+        
+        goUpButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
         });
     </script>
 </body>

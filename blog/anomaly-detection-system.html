@@ -302,7 +302,7 @@ if overall_std < overall_mean:
             <li><code>seasonal=False</code> (since no strong weekly or monthly patterns were observed)</li>
             <li><code>stepwise=True</code> for faster convergence</li>
         </ul>
-
+        
         <p>I didn't just fit the model blindly. I split the time series into <strong>training and validation folds</strong> using <code>TimeSeriesSplit(n_splits=2)</code>. For each fold, I computed the <strong>mean squared error (MSE)</strong> between predicted and actual values. This provided tangible feedback on model accuracy.</p>
 
         <p>After tuning, I forecasted the <strong>next 5 days</strong>, along with <strong>confidence intervals</strong>. I generated synthetic timestamps for the next 5 days and merged the predictions into the historical timeline for a unified view.</p>
