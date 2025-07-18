@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; img-src 'self' data:; font-src 'self' https://cdnjs.cloudflare.com; connect-src 'self'; worker-src 'self' blob:;">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <title>Impact of Data Quality on ML: A Practical Case Study | Eugene Paulia</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css" integrity="sha512-tN7Ec6zAFaVSG3TpNAKtk4DOHNpSwKHxxrsiw4GHKESGPs5njn/0sMCUMl2svV4wo4BK/rCP7juYz+zx+l6oeQ==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <link rel="icon" type="image/png" href="../favicon.png">
+    <style>
+        :root {
+            --primary: #2a3b4c;
+            --secondary: #5d7a98;
+            --accent: #61dafb;
+            --light: #f5f8fa;
+            --dark: #1a1a2e;
+            --text: #333;
+            --text-light: #666;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Mona Sans, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif, Apple Color Emoji, Segoe UI Emoji, Segoe UI Symbol, Noto Color Emoji;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .blog-header {
+            position: relative;
+            height: 60vh;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background-color: var(--dark);
+        }
+        
+        #particles-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: white;
+            max-width: 800px;
+            padding: 0 2rem;
+        }
+        
+        .blog-date {
+            font-size: 1rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            letter-spacing: 1px;
+        }
+        
+        .blog-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+        
+        .blog-author {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .blog-tags {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .blog-tag {
+            background-color: rgba(97, 218, 251, 0.2);
+            color: var(--accent);
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .blog-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+        
+        .blog-content p {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+        
+        .blog-content h2 {
+            font-size: 2rem;
+            color: var(--primary);
+            margin: 3rem 0 1.5rem;
+            position: relative;
+        }
+        
+        .blog-content h3 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin: 2rem 0 1rem;
+        }
+        
+        .blog-content ul, .blog-content ol {
+            margin: 1.5rem 0;
+            padding-left: 2rem;
+        }
+        
+        .blog-content li {
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+        }
+        
+        code {
+            background-color: #f4f4f4;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Fira Code', Mona Sans, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, Arial, Noto Sans, sans-serif;
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background-color: #f8f8f8;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 2rem 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .back-to-home {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            z-index: 100;
+            background-color: white;
+            color: var(--primary);
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .back-to-home:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            color: var(--accent);
+        }
+        
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(97, 218, 251, 0.1), rgba(42, 59, 76, 0.1));
+            border-left: 4px solid var(--accent);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .blog-title {
+                font-size: 2.5rem;
+            }
+            
+            .blog-content {
+                padding: 2rem 1.5rem;
+            }
+            
+            .back-to-home {
+                top: 1rem;
+                left: 1rem;
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="../index.html#projects" class="back-to-home" id="back-link">
+        <i class="fas fa-arrow-left"></i>
+        Back to Projects
+    </a>
+    
+    <header class="blog-header">
+        <canvas id="particles-canvas"></canvas>
+        <div class="header-content">
+            <div class="blog-date">June 2025</div>
+            <h1 class="blog-title">Impact of Data Quality on ML</h1>
+            <div class="blog-author">by Eugene Paulia</div>
+            <div class="blog-tags">
+                <span class="blog-tag">Machine Learning</span>
+                <span class="blog-tag">Data Quality</span>
+                <span class="blog-tag">UntappedEnergy</span>
+            </div>
+        </div>
+    </header>
+    
+    <article class="blog-content">
+        <p>This case study demonstrates the dramatic impact that data preprocessing can have on machine learning model performance using a real-world housing dataset. The project showcases how strategic data quality improvements can deliver immediate, substantial improvements in AI project success rates.</p>
+
+        <div class="highlight-box">
+            <h3>Key Achievement</h3>
+            <p><strong>27.5% improvement in model accuracy</strong> through comprehensive data preprocessing alone, proving that clean data trumps complex algorithms.</p>
+        </div>
+
+        <h2>The Challenge</h2>
+        <p>Industry statistics reveal a sobering reality about AI project success rates:</p>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">85%</div>
+                <div class="stat-label">AI projects fail to deliver on promises</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">70%</div>
+                <div class="stat-label">Failures due to data quality issues</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">$5T</div>
+                <div class="stat-label">Annual revenue lost globally</div>
+            </div>
+        </div>
+
+        <h2>The Experiment: Housing Price Prediction</h2>
+        
+        <h3>Dataset Overview</h3>
+        <ul>
+            <li><strong>Source</strong>: Sberbank Russian Housing Market (Kaggle)</li>
+            <li><strong>Size</strong>: 27,000 records with 20 features</li>
+            <li><strong>Task</strong>: Predict housing prices in rubles</li>
+            <li><strong>Target</strong>: `price_doc` (housing prices)</li>
+        </ul>
+
+        <h3>Initial Data State</h3>
+        <p>The raw dataset exhibited typical real-world data quality issues:</p>
+        <ul>
+            <li>Missing values across multiple columns (up to 50% in some features)</li>
+            <li>Inconsistent data types (numeric values stored as strings)</li>
+            <li>No proper normalization or feature engineering</li>
+            <li>Outliers and noise in the target variable</li>
+            <li>Categorical variables requiring encoding</li>
+        </ul>
+
+        <h2>Methodology</h2>
+
+        <h3>Baseline Model (Minimal Processing)</h3>
+        <p><strong>Approach</strong>: Use only complete numeric columns with zero preprocessing</p>
+        <ul>
+            <li><strong>Features used</strong>: 6 columns (only those with no missing values)</li>
+            <li><strong>Model</strong>: Ridge Regression (α=10.0)</li>
+            <li><strong>Data preparation</strong>: None beyond basic column selection</li>
+        </ul>
+
+        <pre><code class="language-python"># Only use numeric columns with no missing values
+numeric_complete = X_train.select_dtypes(include=[np.number]).dropna(axis=1)
+baseline_model = Ridge(alpha=10.0, random_state=42)
+baseline_model.fit(numeric_complete, y_train)</code></pre>
+
+        <h3>Advanced Model (Comprehensive Preprocessing Pipeline)</h3>
+        <p><strong>Approach</strong>: Industry-standard preprocessing with custom transformers</p>
+
+        <h4>Custom Preprocessing Components</h4>
+
+        <h5>1. HybridImputer: Intelligent Missing Value Handling</h5>
+        <ul>
+            <li><strong>Numeric features</strong>: KNN imputation (k=5) using distance-weighted neighbors</li>
+            <li><strong>Categorical features</strong>: Mode imputation</li>
+        </ul>
+
+        <h5>2. SelectiveFeatureEngineer: Domain-driven Feature Creation</h5>
+        <ul>
+            <li>Living space efficiency ratio</li>
+            <li>Average room size indicator</li>
+            <li>Floor desirability ratio</li>
+            <li>Log-transformed area features</li>
+            <li>Amenity accessibility score</li>
+        </ul>
+
+        <h5>3. SmartCategoricalEncoder: Adaptive Encoding Strategy</h5>
+        <ul>
+            <li>High cardinality (>5 categories): Frequency encoding</li>
+            <li>Low cardinality (≤5 categories): One-hot encoding</li>
+            <li>Handles unseen categories gracefully</li>
+        </ul>
+
+        <pre><code class="language-python"># Advanced preprocessing pipeline
+focused_preprocessor = Pipeline([
+    ('imputer', HybridImputer()),
+    ('feature_engineer', SelectiveFeatureEngineer()), 
+    ('encoder', SmartCategoricalEncoder()),
+    ('scaler', StandardScaler())
+])
+
+model_pipeline = Pipeline([
+    ('preprocessor', focused_preprocessor),
+    ('regressor', Ridge(alpha=10.0, random_state=42))
+])</code></pre>
+
+        <h2>Results</h2>
+
+        <h3>Performance Comparison</h3>
+        <div class="highlight-box">
+            <table style="width: 100%; border-collapse: collapse; margin: 1rem 0;">
+                <thead>
+                    <tr style="background-color: var(--primary); color: white;">
+                        <th style="padding: 0.75rem; text-align: left;">Approach</th>
+                        <th style="padding: 0.75rem; text-align: center;">RMSE (Rubles)</th>
+                        <th style="padding: 0.75rem; text-align: center;">Features Used</th>
+                        <th style="padding: 0.75rem; text-align: center;">R² Score</th>
+                        <th style="padding: 0.75rem; text-align: center;">Improvement</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 0.75rem;"><strong>Baseline</strong></td>
+                        <td style="padding: 0.75rem; text-align: center;">5,887,234</td>
+                        <td style="padding: 0.75rem; text-align: center;">6</td>
+                        <td style="padding: 0.75rem; text-align: center;">0.42</td>
+                        <td style="padding: 0.75rem; text-align: center;">-</td>
+                    </tr>
+                    <tr style="background-color: rgba(97, 218, 251, 0.1);">
+                        <td style="padding: 0.75rem;"><strong>Advanced</strong></td>
+                        <td style="padding: 0.75rem; text-align: center;">4,270,891</td>
+                        <td style="padding: 0.75rem; text-align: center;">15+</td>
+                        <td style="padding: 0.75rem; text-align: center;">0.67</td>
+                        <td style="padding: 0.75rem; text-align: center;"><strong>27.5%</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2>Key Technical Implementations</h2>
+
+        <h3>Strategic Feature Engineering</h3>
+        <pre><code class="language-python"># Living efficiency ratio - captures space utilization
+living_efficiency = life_sq / full_sq
+
+# Room size indicator - proxy for luxury
+avg_room_size = full_sq / num_room
+
+# Floor desirability - middle floors often preferred
+floor_ratio = floor / max_floor
+
+# Amenity score - accessibility to services
+amenity_score = Σ(1 / distance_to_amenity)</code></pre>
+
+        <h3>Context-Aware Missing Value Handling</h3>
+        <pre><code class="language-python">class HybridImputer(BaseEstimator, TransformerMixin):
+    def fit(self, X, y=None):
+        # Learn imputation parameters from training data
+        self.numeric_imputer = KNNImputer(n_neighbors=5)
+        self.categorical_imputer = SimpleImputer(strategy='most_frequent')
+        return self
+    
+    def transform(self, X):
+        # Apply learned transformations
+        X_numeric = self.numeric_imputer.transform(X.select_dtypes(include=[np.number]))
+        X_categorical = self.categorical_imputer.transform(X.select_dtypes(include=['object']))
+        return np.hstack([X_numeric, X_categorical])</code></pre>
+
+        <h3>Adaptive Categorical Encoding</h3>
+        <pre><code class="language-python">def smart_encode_categorical(X, threshold=5):
+    """Adaptive encoding based on cardinality"""
+    for col in X.select_dtypes(include=['object']):
+        unique_count = X[col].nunique()
+        
+        if unique_count > threshold:
+            # High cardinality: use frequency encoding
+            X[col] = X[col].map(X[col].value_counts(normalize=True))
+        else:
+            # Low cardinality: use one-hot encoding
+            X = pd.get_dummies(X, columns=[col], drop_first=True)
+    
+    return X</code></pre>
+
+        <h2>Business Impact</h2>
+        <p>For a housing market application:</p>
+        <ul>
+            <li><strong>Baseline RMSE</strong>: ₽5.9M average prediction error</li>
+            <li><strong>Advanced RMSE</strong>: ₽4.3M average prediction error</li>
+            <li><strong>Practical benefit</strong>: ₽1.6M more accurate predictions on average</li>
+        </ul>
+
+        <p>This improvement translates to:</p>
+        <ul>
+            <li>More accurate property valuations</li>
+            <li>Better investment decisions</li>
+            <li>Reduced financial risk in real estate transactions</li>
+        </ul>
+
+        <h2>Lessons Learned</h2>
+
+        <h3>1. Preprocessing ROI is Immediate</h3>
+        <ul>
+            <li><strong>Time investment</strong>: ~4 hours for comprehensive pipeline</li>
+            <li><strong>Performance gain</strong>: 27.5% error reduction</li>
+            <li><strong>Effort-to-impact ratio</strong>: Exceptionally high</li>
+        </ul>
+
+        <h3>2. Feature Engineering Amplifies Signal</h3>
+        <p>Raw features often don't capture domain relationships:</p>
+        <ul>
+            <li>Room efficiency ratios matter more than raw square footage</li>
+            <li>Accessibility scores matter more than individual distances</li>
+            <li>Relative positions (floor ratios) matter more than absolute values</li>
+        </ul>
+
+        <h3>3. Pipeline Design Prevents Common Pitfalls</h3>
+        <ul>
+            <li><strong>Data leakage</strong>: Fit transformers only on training data</li>
+            <li><strong>Overfitting</strong>: Selective feature engineering vs. automated feature generation</li>
+            <li><strong>Production issues</strong>: Handle unseen categories gracefully</li>
+        </ul>
+
+        <h2>Conclusion</h2>
+        <p>This case study demonstrates that <strong>strategic data preprocessing delivers immediate, substantial improvements</strong> in machine learning performance. The progression from baseline to advanced preprocessing showcases how systematic data quality improvements compound to deliver substantial business value.</p>
+
+        <div class="highlight-box">
+            <h3>Key Takeaways</h3>
+            <ol>
+                <li><strong>Clean data trumps complex algorithms</strong>: 27.5% improvement through preprocessing alone</li>
+                <li><strong>Domain knowledge guides feature engineering</strong>: Understanding housing markets led to effective feature creation</li>
+                <li><strong>Pipeline design matters</strong>: Proper architecture prevents common pitfalls</li>
+                <li><strong>Categorical data is valuable</strong>: Smart encoding preserves important information</li>
+                <li><strong>ROI is immediate</strong>: High-impact improvements with reasonable time investment</li>
+            </ol>
+        </div>
+
+        <p><em>This case study was presented by GroupLabs at the "AI-Ready or AI-Hopeful?" workshop for UntappedEnergy, demonstrating practical approaches to improving AI project success rates through systematic data quality practices for UntappedEnergy.</em></p>
+    </article>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js" integrity="sha512-axJX7DJduStuBB8ePC8ryGzacZPr3rdLaIDZitiEgWWk2gsXxEFlm4UW0iNzj2h3wp5mOylgHAzBzM4nRSvTZA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-python.min.js" integrity="sha512-lPbwGiPWBLOs6Vq0Kkm4T/oYPQwXWqm8KkZTXvxGZqg4TjGZVUVJV2a6Z1rI04yBXTKJ4HhU/xEzoyHvTWFLg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        // Check referrer and update back link
+        document.addEventListener('DOMContentLoaded', function() {
+            const referrer = document.referrer;
+            const backLink = document.getElementById('back-link');
+            
+            if (referrer.includes('all-projects.html')) {
+                backLink.href = 'all-projects.html';
+            }
+        });
+
+        // Particle system animation
+        const canvas = document.getElementById('particles-canvas');
+        const ctx = canvas.getContext('2d');
+        
+        function resizeCanvas() {
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+        
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = Math.random() * 0.2 - 0.1;
+                this.vy = Math.random() * 0.2 - 0.1;
+                this.radius = Math.random() * 2 + 1;
+                this.opacity = Math.random() * 0.5 + 0.2;
+            }
+            
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+            
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(97, 218, 251, ${this.opacity})`;
+                ctx.fill();
+            }
+        }
+        
+        const particles = Array.from({ length: 100 }, () => new Particle());
+        
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+            
+            particles.forEach((p1, i) => {
+                particles.slice(i + 1).forEach(p2 => {
+                    const dx = p1.x - p2.x;
+                    const dy = p1.y - p2.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (distance < 100) {
+                        ctx.beginPath();
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = `rgba(97, 218, 251, ${0.2 * (1 - distance / 100)})`;
+                        ctx.stroke();
+                    }
+                });
+            });
+        }
+        
+        animate();
+    </script>
+</body>
+</html> 
